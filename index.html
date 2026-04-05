@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Taberna Nintendera</title>
+  <style>
+    :root {
+      --bg: #fcf8f2;
+      --panel: #fffaf2;
+      --panel-soft: #f9efe0;
+      --text: #5a2f00;
+      --text-soft: #8a5a2b;
+      --border: #5a2f00;
+      --accent: #b7791f;
+      --accent-2: #d69e2e;
+      --card-shadow: 0 8px 24px rgba(90, 47, 0, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      text-align: center;
+      border-bottom: 4px solid var(--border);
+      padding-bottom: 28px;
+      margin-bottom: 28px;
+    }
+
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(2.3rem, 5vw, 4.2rem);
+      line-height: 0.95;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+      letter-spacing: -0.05em;
+    }
+
+    h2 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      color: var(--text-soft);
+      font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+      margin: 0;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin: 16px auto 0;
+      color: rgba(90, 47, 0, 0.8);
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+
+    .filters {
+      background: rgba(249, 239, 224, 0.65);
+      border: 1px solid #ead4b0;
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 28px;
+    }
+
+    .filters h3,
+    .menu-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: Georgia, 'Times New Roman', serif;
+      margin: 0 0 16px;
+      color: var(--border);
+      font-size: 1.25rem;
+      border-bottom: 1px solid #e0c49d;
+      padding-bottom: 12px;
+    }
+
+    .grid-filters {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 2px solid #e0c49d;
+      background: white;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(214, 158, 46, 0.18);
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .menu-title {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      font-size: 1.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      padding: 6px 12px;
+      background: var(--border);
+      color: var(--bg);
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 70px 18px;
+      background: white;
+      border: 2px dashed #e0c49d;
+      border-radius: var(--radius);
+    }
+
+    .empty p {
+      margin: 0;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--text-soft);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card-wrap {
+      position: relative;
+    }
+
+    .card-shadow {
+      position: absolute;
+      inset: 0;
+      transform: translate(6px, 6px);
+      border: 1px solid #e0c49d;
+      border-radius: 14px;
+      background: rgba(249, 239, 224, 0.35);
+    }
+
+    .card {
+      position: relative;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .card h4 {
+      margin: 0;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1.25rem;
+      line-height: 1.15;
+      color: #2e1400;
+    }
+
+    .platform {
+      white-space: nowrap;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: var(--border);
+      color: var(--bg);
+      padding: 6px 9px;
+      border-radius: 8px;
+    }
+
+    .desc {
+      margin: 0;
+      color: rgba(90, 47, 0, 0.9);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      font-style: italic;
+      flex: 1;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 14px;
+      margin-top: 14px;
+      border-top: 1px dashed #e0c49d;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #ead4b0;
+      background: #fffaf1;
+      color: var(--text-soft);
+      padding: 6px 9px;
+      border-radius: 7px;
+    }
+
+    footer {
+      text-align: center;
+      color: rgba(90, 47, 0, 0.6);
+      font-size: 0.92rem;
+      padding: 28px 0 8px;
+    }
+
+    @media (max-width: 860px) {
+      .grid-filters, .cards { grid-template-columns: 1fr; }
+      .menu-header { gap: 12px; align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="icon">🍽️</div>
+      <h1>La Taberna Nintendera</h1>
+      <h2>Especialidades de la Casa · Diversión a la Carta</h2>
+      <p class="intro">
+        Bienvenido a nuestro restaurante gourmet. Usa los filtros para encontrar el "plato" que mejor se adapte al nivel de estrés y al número de invitados que tengas hoy en casa.
+      </p>
+    </header>
+
+    <main>
+      <section class="filters">
+        <h3>🔎 ¿Qué le apetece degustar hoy?</h3>
+        <div class="grid-filters">
+          <div class="field">
+            <label for="platformFilter">🎮 Plataforma (La Mesa)</label>
+            <select id="platformFilter"></select>
+          </div>
+          <div class="field">
+            <label for="themeFilter">👨‍🍳 Temática (El Sabor)</label>
+            <select id="themeFilter"></select>
+          </div>
+          <div class="field">
+            <label for="playersFilter">👥 Jugadores (Comensales)</label>
+            <select id="playersFilter">
+              <option>Cualquier grupo</option>
+              <option>Lobo Solitario (1)</option>
+              <option>Duelo romántico/mortal (2)</option>
+              <option>El clásico trío (3)</option>
+              <option>Fiesta moderada (4)</option>
+              <option>Caos absoluto (5+)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="menu-header">
+          <h3 class="menu-title">Menú Disponible</h3>
+          <span class="count-badge" id="countBadge">0</span>
+        </div>
+
+        <div id="results"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>🍽️ La Taberna Nintendera - Reservados todos los derechos (y todos los mandos rotos).</p>
+      <p>Propina no incluida. No se admiten devoluciones por piques amistosos.</p>
+    </footer>
+  </div>
+
+  <script>
+    const GAMES_DB = [
+      { id: 1, title: "Juegos en Familia", platform: "Wii", theme: "Fiesta y Minijuegos", players: "1-4", maxPlayers: 4, description: "Surtido de aperitivos ligeros para que la abuela y el primo pequeño jueguen sin romperse nada. Sabor a domingo por la tarde." },
+      { id: 2, title: "Mario Kart Wii", platform: "Wii", theme: "Carreras Temerarias", players: "1-4", maxPlayers: 4, description: "El rompe-amistades de la casa. Servido con una generosa guarnición de Caparazones Azules. No nos hacemos cargo de mandos estampados." },
+      { id: 3, title: "Mario Strikers Charged Football", platform: "Wii", theme: "Deportes Extremos", players: "1-4", maxPlayers: 4, description: "Fútbol, pero si las faltas estuvieran permitidas y el balón te pudiera electrocutar. Muy picante." },
+      { id: 4, title: "Super Smash Bros. Brawl", platform: "Wii", theme: "Peleas Callejeras", players: "1-4", maxPlayers: 4, description: "Ideal para resolver disputas familiares por la herencia de forma civilizada... a guantazos virtuales. Incluye tropezones al azar (gracias, Sakurai)." },
+      { id: 5, title: "Trivial Pursuit", platform: "Wii", theme: "Cerebritos", players: "1-4", maxPlayers: 4, description: "El plato perfecto para demostrarle a tu cuñado que no sabe tanto como cree. Se sirve frío." },
+      { id: 6, title: "Wii Sports", platform: "Wii", theme: "Deportes y Sudor", players: "1-4", maxPlayers: 4, description: "El clásico de la casa. Cuidado con no lanzar el mando a la tele al jugar a los bolos (historia real de este restaurante)." },
+      { id: 7, title: "Wii Sports Resort", platform: "Wii", theme: "Deportes y Sudor", players: "1-4", maxPlayers: 4, description: "Como el anterior, pero con sabor tropical. Cortar frutas con la espada es un excelente ejercicio de digestión." },
+      { id: 8, title: "Zumba Fitness 2", platform: "Wii", theme: "Baile y Tortura", players: "1-4", maxPlayers: 4, description: "El especial quema-calorías de la abuela. Sudarás más que intentando pasarte un nivel de agua." },
+      { id: 9, title: "New Super Mario Bros. U + New Super Luigi U", platform: "Wii U", theme: "Plataformas Clásicas", players: "1-4", maxPlayers: 4, description: "Un plato doble y contundente. Si alguien te agarra en pleno salto y te tira al vacío, estás en tu derecho de no hablarle durante la cena." },
+      { id: 10, title: "Nintendo Land", platform: "Wii U", theme: "Fiesta y Minijuegos", players: "1-5", maxPlayers: 5, description: "Tapas variadas asimétricas. El que tiene el mando con pantalla se cree el jefe del restaurante, pero los demás pueden cazarle." },
+      { id: 11, title: "Super Mario 3D World", platform: "Wii U", theme: "Plataformas Clásicas", players: "1-4", maxPlayers: 4, description: "Sabe a gloria bendita. Todos disfrazados de gatos robándose las coronas entre sí. Alta cocina Nintendera." },
+      { id: 12, title: "Super Smash Bros. For Wii U", platform: "Wii U", theme: "Peleas Callejeras", players: "1-8", maxPlayers: 8, description: "Ocho personas pegándose a la vez en una pantalla. Es menos una comida y más una guerra de comida de colegio." },
+      { id: 13, title: "ARMS", platform: "Switch", theme: "Peleas Callejeras", players: "1-4", maxPlayers: 4, description: "Boxeo con muelles. Ideal para desestresarse después de un mal día estirando los brazos como si fueras un fideo." },
+      { id: 14, title: "FIFA", platform: "Switch", theme: "Deportes y Sudor", players: "1-4", maxPlayers: 4, description: "El típico plato de comida rápida que a todo el mundo le gusta aunque se quejen de que sabe igual todos los años." },
+      { id: 15, title: "Go Vacation", platform: "Switch", theme: "Fiesta y Minijuegos", players: "1-4", maxPlayers: 4, description: "Buffet libre de minijuegos. Te puedes tirar en paracaídas o patinar, perfecto para cuando tienes pereza de irte de vacaciones de verdad." },
+      { id: 16, title: "Jump Force", platform: "Switch", theme: "Peleas Callejeras", players: "1-2", maxPlayers: 2, description: "Macedonia de anime. Goku y Naruto dándose palizas. Visualmente un poco crudo en Switch, pero sabe a nostalgia otaku." },
+      { id: 17, title: "Kirby's Return to Dream Land Deluxe", platform: "Switch", theme: "Plataformas Clásicas", players: "1-4", maxPlayers: 4, description: "Un postre rosa y dulce. Kirby se lo come todo, igual que tú cuando llegas con hambre a las 3 de la mañana." },
+      { id: 18, title: "Mario kart 8 Deluxe", platform: "Switch", theme: "Carreras Temerarias", players: "1-4 (Local) / 8+ (Online)", maxPlayers: 8, description: "El plato más vendido de nuestra historia. Si te tiran un rayo justo antes de la meta, pide el libro de reclamaciones." },
+      { id: 19, title: "Mario Strikers: Battle League Football", platform: "Switch", theme: "Deportes Extremos", players: "1-8", maxPlayers: 8, description: "Aún más violento que su predecesor. El árbitro está comprado o simplemente está mirando a otro lado." },
+      { id: 20, title: "Nintendo Switch Sports", platform: "Switch", theme: "Deportes y Sudor", players: "1-4", maxPlayers: 4, description: "Un refrito moderno del clásico de Wii. Recuerda abrocharte la correa, no queremos repetir el 'Incidente de la Tele Rota de 2006'." },
+      { id: 21, title: "Super Mario Bros. Wonder", platform: "Switch", theme: "Plataformas Clásicas", players: "1-4", maxPlayers: 4, description: "Un viaje psicodélico. Creemos que las Flores Maravilla llevaban un ingrediente especial. Totalmente alucinante." },
+      { id: 22, title: "Super Smash Bros. Ultimate", platform: "Switch", theme: "Peleas Callejeras", players: "1-8", maxPlayers: 8, description: "¡ESTÁN TODOS! Literalmente el menú completo en un solo juego. Cuidado al jugar a 8 porque no sabrás ni dónde está tu personaje." },
+      { id: 23, title: "Kirby Air Riders", platform: "Switch 2", theme: "Carreras Temerarias", players: "1-4", maxPlayers: 4, description: "Plato experimental importado desde el futuro con la máquina de Doc Brown. Estrellas voladoras y nostalgia de GameCube remasterizada. ¡Exclusivo!" }
+    ];
+
+    const platformFilter = document.getElementById('platformFilter');
+    const themeFilter = document.getElementById('themeFilter');
+    const playersFilter = document.getElementById('playersFilter');
+    const results = document.getElementById('results');
+    const countBadge = document.getElementById('countBadge');
+
+    const platforms = ['Todas las Mesas', ...new Set(GAMES_DB.map(g => g.platform))];
+    const themes = ['Todos los Sabores', ...new Set(GAMES_DB.map(g => g.theme))];
+
+    function populateSelect(select, items) {
+      select.innerHTML = items.map(item => `<option value="${item}">${item}</option>`).join('');
+    }
+
+    function matchesPlayers(gameMax, filterValue) {
+      if (filterValue === 'Lobo Solitario (1)') return gameMax >= 1;
+      if (filterValue === 'Duelo romántico/mortal (2)') return gameMax >= 2;
+      if (filterValue === 'El clásico trío (3)') return gameMax >= 3;
+      if (filterValue === 'Fiesta moderada (4)') return gameMax >= 4;
+      if (filterValue === 'Caos absoluto (5+)') return gameMax >= 5;
+      return true;
+    }
+
+    function getFilteredGames() {
+      const selectedPlatform = platformFilter.value;
+      const selectedTheme = themeFilter.value;
+      const selectedPlayers = playersFilter.value;
+
+      return GAMES_DB.filter(game => {
+        const matchPlatform = selectedPlatform === 'Todas las Mesas' || game.platform === selectedPlatform;
+        const matchTheme = selectedTheme === 'Todos los Sabores' || game.theme === selectedTheme;
+        const matchPlayers = matchesPlayers(game.maxPlayers, selectedPlayers);
+        return matchPlatform && matchTheme && matchPlayers;
+      });
+    }
+
+    function iconForGame(game) {
+      const map = {
+        'Carreras Temerarias': '🏎️',
+        'Peleas Callejeras': '🥊',
+        'Deportes y Sudor': '🏅',
+        'Deportes Extremos': '🔥',
+        'Fiesta y Minijuegos': '🎉',
+        'Plataformas Clásicas': '⭐',
+        'Cerebritos': '🧠',
+        'Baile y Tortura': '💃'
+      };
+      return map[game.theme] || '🎮';
+    }
+
+    function render() {
+      const filtered = getFilteredGames();
+      countBadge.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        results.innerHTML = `
+          <div class="empty">
+            <p>"Lo sentimos, el Chef no tiene ingredientes para este plato hoy. ¡Pruebe otra combinación!"</p>
+          </div>
+        `;
+        return;
+      }
+
+      results.innerHTML = `
+        <div class="cards">
+          ${filtered.map(game => `
+            <article class="card-wrap">
+              <div class="card-shadow"></div>
+              <div class="card">
+                <div class="card-top">
+                  <h4>${iconForGame(game)} ${game.title}</h4>
+                  <span class="platform">${game.platform}</span>
+                </div>
+                <p class="desc">${game.description}</p>
+                <div class="meta">
+                  <span class="tag">⭐ ${game.theme}</span>
+                  <span class="tag">👥 Máx: ${game.players}</span>
+                </div>
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    populateSelect(platformFilter, platforms);
+    populateSelect(themeFilter, themes);
+
+    platformFilter.addEventListener('change', render);
+    themeFilter.addEventListener('change', render);
+    playersFilter.addEventListener('change', render);
+
+    render();
+  </script>
+</body>
+</html>
