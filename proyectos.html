@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos - Alvaro Guerrero</title>
+    <link rel="icon" href="../imagenes/icono.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#ff6347', 
+                        secondary: '#1d6fbd', 
+                        accent: '#ffb347',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-[#0b0f19] text-slate-100 overflow-x-hidden antialiased;
+            }
+            ::-webkit-scrollbar { width: 8px; }
+            ::-webkit-scrollbar-track { background: #0b0f19; }
+            ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; border: 2px solid #0b0f19; }
+            ::-webkit-scrollbar-thumb:hover { background: #ff6347; }
+        }
+
+        @layer components {
+            /* Estructura Header (Igual que index) */
+            header { @apply fixed top-0 left-0 w-full z-50 bg-[#0b0f19]/80 backdrop-blur-lg border-b border-slate-900 transition-all duration-300; }
+            nav { @apply max-w-7xl mx-auto px-6 py-4 flex justify-between items-center; }
+            .logo a { @apply text-lg md:text-xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#1d6fbd] hover:opacity-80 transition-opacity; }
+            nav ul { @apply flex space-x-6 text-sm font-medium tracking-wide; }
+            nav ul li a { @apply text-slate-300 hover:text-primary transition-colors; }
+            nav ul li a.active { @apply text-primary; }
+            .lang-btn { @apply px-3 py-1 ml-6 text-xs font-semibold border border-slate-800 rounded-md hover:border-primary hover:text-primary transition-all bg-slate-950/40 text-slate-300; }
+
+            /* Estilos de la sección Proyectos */
+            .projects { @apply pt-32 pb-24 min-h-screen relative z-10; }
+            .container { @apply max-w-7xl mx-auto px-6; }
+            .pronto { @apply text-center text-primary font-semibold tracking-widest uppercase mb-2 mt-8 text-sm md:text-base; }
+            #projects-title { @apply text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-12; }
+            
+            .projects-grid { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-8; }
+            .project-card { @apply bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 flex flex-col; }
+            .project-image { @apply w-full h-48 overflow-hidden bg-slate-950 flex-shrink-0; }
+            .project-image img { @apply w-full h-full object-cover transition-transform duration-700 hover:scale-110; }
+            .project-content { @apply p-6 flex flex-col flex-grow; }
+            .project-content h3 { @apply text-xl font-bold text-slate-100 mb-2; }
+            .project-content p { @apply text-slate-400 text-sm mb-5 flex-grow leading-relaxed; }
+            
+            .tech-tags { @apply flex flex-wrap gap-2 mb-6; }
+            .tech-tag { @apply px-2.5 py-1 bg-primary/10 text-primary text-[11px] font-bold tracking-wide uppercase rounded-full border border-primary/20; }
+            
+            .project-link { @apply inline-flex justify-center items-center w-full px-4 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/40 mt-auto; }
+        }
+    </style>
+
+    <style>
+        /* Reglas específicas para el canvas de fondo */
+        #wave-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="wave-canvas"></canvas>
+    
+    <header>
+        <nav>
+            <h1 class="logo"><a href="index.html">Alvaro Media</a></h1>
+            <div class="flex items-center">
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="proyectos.html" class="active">Proyectos</a></li>
+                    <li><a href="index.html#contact">Contacto</a></li>
+                </ul>
+                <button id="lang-toggle" class="lang-btn">EN</button>
+            </div>
+        </nav>
+    </header>
+
+    <section class="projects">
+        <h1 class="pronto">Coming soon</h1>
+        <div class="container">
+            <h2 id="projects-title">Mis Proyectos</h2>
+            
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="../imagenes/logo-fondo-negro.svg" alt="Alvaro Media" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1e293b/ffffff?text=Alvaro+Media';">
+                    </div>
+                    <div class="project-content">
+                        <h3 id="project1-title">Alvaro Media</h3>
+                        <p id="project1-desc">Plataforma web de streaming con catálogo personalizado y diseño responsive.</p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">HTML</span>
+                            <span class="tech-tag">CSS</span>
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">JSON</span>
+                        </div>
+                        <a href="#" class="project-link" id="project1-link">Ver Proyecto</a>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="../imagenes/cocinetica.jpg" alt="Cocinetica" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1e293b/ffffff?text=Cocinetica';">
+                    </div>
+                    <div class="project-content">
+                        <h3 id="project2-title">Cocinetica</h3>
+                        <p id="project2-desc">Aplicación móvil para crear recetas, verlas, guardarlas y comentarlas.</p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Kotlin</span>
+                            <span class="tech-tag">Android</span>
+                            <span class="tech-tag">SQL</span>
+                            <span class="tech-tag">PHP</span>
+                            <span class="tech-tag">JSON</span>
+                            <span class="tech-tag">HTML</span>
+                            <span class="tech-tag">CSS</span>
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">XML</span>
+                        </div>
+                        <a href="#" class="project-link" id="project2-link">Ver Detalles</a>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="../imagenes/Cofre.png" alt="SGIM" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1e293b/ffffff?text=SGIM';">
+                    </div>
+                    <div class="project-content">
+                        <h3 id="project3-title">SGIM</h3>
+                        <p id="project3-desc">Sistema de gestión de inventario de cofres del videojuego Minecraft</p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Java</span>
+                            <span class="tech-tag">SQL</span>
+                            <span class="tech-tag">Swing</span>
+                            <span class="tech-tag">JavaFX</span>
+                            <span class="tech-tag">FXML</span>
+                            <span class="tech-tag">JASPER</span>
+                            <span class="tech-tag">PHP</span>
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">HTML</span>
+                            <span class="tech-tag">CSS</span>
+                        </div>
+                        <a href="#" class="project-link" id="project3-link">Ver Detalles</a>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="../imagenes/jungla.jpg" alt="Moai Jungle" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1e293b/ffffff?text=Moai+Jungle';">
+                    </div>
+                    <div class="project-content">
+                        <h3 id="project4-title">Moai Jungle</h3>
+                        <p id="project4-desc">Videojuego plataforma hecho con godot</p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">GDSCRIPT</span>
+                        </div>
+                        <a href="#" class="project-link" id="project4-link">Ver Detalles</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="../imagenes/flame-sin-texto.jpg" alt="Flame" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1e293b/ffffff?text=Flame';">
+                    </div>
+                    <div class="project-content">
+                        <h3 id="project5-title">Flame</h3>
+                        <p id="project5-desc">Plataforma de e-commerce sobre zapatillas</p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">PHP</span>
+                            <span class="tech-tag">HTML</span>
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">CSS</span>
+                            <span class="tech-tag">SQL</span>
+                            <span class="tech-tag">Sesiones</span>
+                        </div>
+                        <a href="#" class="project-link" id="project5-link">Ver Detalles</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="../imagenes/keylogger.png" alt="Keylogger Phantom" onerror="this.onerror=null; this.src='https://placehold.co/600x400/1e293b/ffffff?text=Keylogger';">
+                    </div>
+                    <div class="project-content">
+                        <h3 id="project6-title">Keylogger Phantom</h3>
+                        <p id="project6-desc">Proyecto educativo en Python para el estudio de monitorización de eventos en sistemas Linux/Windows</p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Linux</span>
+                            <span class="tech-tag">Windows</span>
+                            <span class="tech-tag">Ciberseguridad</span>
+                            <span class="tech-tag">pynput</span>
+                            <span class="tech-tag">Monitorización</span>
+                        </div>
+                        <a href="#" class="project-link" id="project6-link">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 bg-[#0b0f19] text-center border-t border-slate-900 relative z-10">
+        <p id="copyright" class="text-sm text-slate-500 font-medium tracking-wide">&copy; 2025-2026 Alvaro Guerrero Duarte.</p>
+    </footer>
+
+    <script>
+        const translations = {
+            es: {
+                navInicio: "Inicio",
+                navProyectos: "Proyectos",
+                navContacto: "Contacto",
+                projectsTitle: "Mis Proyectos",
+                
+                project1Title: "Alvaro Media",
+                project1Desc: "Plataforma web de streaming con catálogo personalizado y diseño responsive.",
+                project1Link: "Ver Proyecto",
+                
+                project2Title: "Cocinetica",
+                project2Desc: "Aplicación móvil para crear recetas, verlas, guardarlas y comentarlas.",
+                project2Link: "Ver Detalles",
+                
+                project3Title: "SGIM",
+                project3Desc: "Sistema de gestión de inventario de cofres del videojuego Minecraft",
+                project3Link: "Ver Detalles",
+                
+                project4Title: "Moai Jungle",
+                project4Desc: "Videojuego plataforma hecho con godot",
+                project4Link: "Ver Detalles",
+                
+                project5Title: "Flame",
+                project5Desc: "Plataforma de e-commerce sobre zapatillas",
+                project5Link: "Ver Detalles",
+                
+                project6Title: "Keylogger Phantom",
+                project6Desc: "Proyecto educativo en Python para el estudio de monitorización de eventos en sistemas Linux/Windows",
+                project6Link: "Ver Detalles",
+                copyright: "&copy; 2025-2026 Alvaro Guerrero Duarte."
+            },
+            en: {
+                navInicio: "Home",
+                navProyectos: "Projects",
+                navContacto: "Contact",
+                projectsTitle: "My Projects",
+                
+                project1Title: "Alvaro Media",
+                project1Desc: "Streaming web platform with personalized catalog and responsive design.",
+                project1Link: "View Project",
+                
+                project2Title: "Cocinetica",
+                project2Desc: "Mobile application to create recipes, view them, save them and comment on them.",
+                project2Link: "View Details",
+                
+                project3Title: "SGIM",
+                project3Desc: "Inventory management system for Minecraft chests",
+                project3Link: "View Details",
+                
+                project4Title: "Moai Jungle",
+                project4Desc: "Platform video game made with Godot",
+                project4Link: "View Details",
+                
+                project5Title: "Flame",
+                project5Desc: "E-commerce platform for sneakers",
+                project5Link: "View Details",
+                
+                project6Title: "Keylogger Phantom",
+                project6Desc: "Educational Python project for studying event monitoring in Linux/Windows systems",
+                project6Link: "View Details",
+                copyright: "&copy; 2025-2026 Alvaro Guerrero Duarte."
+            }
+        };
+
+        let currentLang = localStorage.getItem("lang") || "es";
+
+        function setLanguage(lang) {
+            localStorage.setItem("lang", lang);
+            document.querySelector('nav ul li:nth-child(1) a').textContent = translations[lang].navInicio;
+            document.querySelector('nav ul li:nth-child(2) a').textContent = translations[lang].navProyectos;
+            document.querySelector('nav ul li:nth-child(3) a').textContent = translations[lang].navContacto;
+            document.getElementById("projects-title").textContent = translations[lang].projectsTitle;
+            
+            document.getElementById("project1-title").textContent = translations[lang].project1Title;
+            document.getElementById("project1-desc").textContent = translations[lang].project1Desc;
+            document.getElementById("project1-link").textContent = translations[lang].project1Link;
+            
+            document.getElementById("project2-title").textContent = translations[lang].project2Title;
+            document.getElementById("project2-desc").textContent = translations[lang].project2Desc;
+            document.getElementById("project2-link").textContent = translations[lang].project2Link;
+            
+            document.getElementById("project3-title").textContent = translations[lang].project3Title;
+            document.getElementById("project3-desc").textContent = translations[lang].project3Desc;
+            document.getElementById("project3-link").textContent = translations[lang].project3Link;
+            
+            document.getElementById("project4-title").textContent = translations[lang].project4Title;
+            document.getElementById("project4-desc").textContent = translations[lang].project4Desc;
+            document.getElementById("project4-link").textContent = translations[lang].project4Link;
+            
+            document.getElementById("project5-title").textContent = translations[lang].project5Title;
+            document.getElementById("project5-desc").textContent = translations[lang].project5Desc;
+            document.getElementById("project5-link").textContent = translations[lang].project5Link;
+            
+            document.getElementById("project6-title").textContent = translations[lang].project6Title;
+            document.getElementById("project6-desc").textContent = translations[lang].project6Desc;
+            document.getElementById("project6-link").textContent = translations[lang].project6Link;
+            
+            document.getElementById("copyright").innerHTML = translations[lang].copyright;
+            document.getElementById("lang-toggle").textContent = lang === "es" ? "EN" : "ES";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setLanguage(currentLang);
+            document.getElementById("lang-toggle").addEventListener("click", () => {
+                currentLang = currentLang === "es" ? "en" : "es";
+                setLanguage(currentLang);
+            });
+        });
+    </script>
+
+    <script>
+    (function() {
+      const SPACING        = 13;
+      const DOT_RADIUS     = 0.85;
+      const EFFECT_RADIUS  = 100;
+      const COLOR_RADIUS   = 60;
+      const MAX_PUSH       = 18;
+      const NOISE_RADIUS   = 140;
+      const NOISE_AMP      = 2.8;
+      const NOISE_SPEED    = 0.0008;
+      const WAVE_SPEED        = 220;
+      const WAVE_WIDTH        = 155;
+      const WAVE_MAX_RADIUS   = 1380;
+      const WAVE_INTENSITY    = 13.5;
+      const RIPPLE_COUNT      = 3;
+      const RIPPLE_SPACING    = 130;
+      const RIPPLE_WIDTH      = 50;
+      const RIPPLE_INTENSITY  = 4.5;
+      const RIPPLE_COLOR_MIX  = 0.55;
+      
+      const COLOR_CENTER     = [29, 111, 189]; // Adaptado al azul del tema
+      const COLOR_WHITE      = [241, 245, 249]; 
+      const COLOR_WAVE_DARK  = [11, 15, 25]; 
+      const COLOR_WAVE_LIGHT = [255, 99, 71]; // Adaptado al naranja del tema
+      const COLOR_RIPPLE     = [255, 179, 71]; 
+
+      const BLOCKED_SELECTORS = 'a, button, input, textarea, select, label, .project-card, .contact-info, .contact-form, .social-icon, .submit-btn, .lang-btn, .tech-tag, .project-link';
+      
+      const canvas = document.getElementById('wave-canvas');
+      const ctx    = canvas.getContext('2d');
+      let W, H, dots = [], waves = [];
+      let mouse = { x: -9999, y: -9999 };
+      
+      function resize() {
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width  = W * devicePixelRatio;
+        canvas.height = H * devicePixelRatio;
+        ctx.setTransform(1,0,0,1,0,0);
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        buildDots();
+      }
+      
+      function buildDots() {
+        dots = [];
+        const cols = Math.ceil(W / SPACING) + 2;
+        const rows = Math.ceil(H / SPACING) + 2;
+        const ox = (W % SPACING) / 2;
+        const oy = (H % SPACING) / 2;
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            dots.push({
+              bx: ox + col * SPACING,
+              by: oy + row * SPACING,
+              phaseX: Math.random() * Math.PI * 2,
+              phaseY: Math.random() * Math.PI * 2,
+              freqX: 0.6 + Math.random() * 0.8,
+              freqY: 0.6 + Math.random() * 0.8,
+            });
+          }
+        }
+      }
+      
+      function getRippleOffsets() {
+        const offsets = [];
+        if (RIPPLE_COUNT === 0) return offsets;
+        if (RIPPLE_COUNT % 2 === 1) {
+          const half = Math.floor(RIPPLE_COUNT / 2);
+          for (let i = 1; i <= half; i++) offsets.push(+i * RIPPLE_SPACING);
+          for (let i = 1; i <= half; i++) offsets.push(-i * RIPPLE_SPACING);
+        } else {
+          for (let i = 1; i <= RIPPLE_COUNT; i++) offsets.push(-i * RIPPLE_SPACING);
+        }
+        return offsets;
+      }
+      const RIPPLE_OFFSETS = getRippleOffsets();
+      
+      function lerpColor(a, b, t) {
+        return [a[0]+(b[0]-a[0])*t|0, a[1]+(b[1]-a[1])*t|0, a[2]+(b[2]-a[2])*t|0];
+      }
+      function smoothstep(t) { return t * t * (3 - 2 * t); }
+      
+      document.addEventListener('mousemove', e => {
+        mouse.x = e.clientX; mouse.y = e.clientY;
+      });
+      document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+      
+      // Se delega al documento pero el CSS de los links/cards detendrá la creación accidental de ondas si interactúan
+      document.addEventListener('click', e => {
+        if (e.target.closest(BLOCKED_SELECTORS)) return;
+        waves.push({ x: e.clientX, y: e.clientY, radius: 0, born: performance.now() });
+      });
+      
+      function draw(ts) {
+        for (let w of waves) w.radius = (ts - w.born) / 1000 * WAVE_SPEED;
+        waves = waves.filter(w => w.radius - WAVE_WIDTH < WAVE_MAX_RADIUS);
+        
+        ctx.clearRect(0, 0, W, H);
+        
+        for (let i = 0; i < dots.length; i++) {
+          const d = dots[i];
+          const screenY = d.by;
+          const dx   = d.bx - mouse.x;
+          const dy   = screenY - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          const t = ts * NOISE_SPEED;
+          let nx = 0, ny = 0;
+          if (dist < NOISE_RADIUS) {
+            const inf = smoothstep(1 - dist / NOISE_RADIUS);
+            nx = Math.sin(t * d.freqX + d.phaseX) * NOISE_AMP * inf;
+            ny = Math.cos(t * d.freqY + d.phaseY) * NOISE_AMP * inf;
+          }
+          
+          let px = 0, py = 0;
+          if (dist < EFFECT_RADIUS) {
+            const ef  = smoothstep(1 - dist / EFFECT_RADIUS);
+            const ang = Math.atan2(dy, dx);
+            px = Math.cos(ang) * ef * MAX_PUSH;
+            py = Math.sin(ang) * ef * MAX_PUSH;
+          }
+          
+          let wx = 0, wy = 0;
+          let maxWavePresence = 0, maxRipplePresence = 0;
+          let finalWaveColor = COLOR_WHITE;
+          
+          for (const w of waves) {
+            const wdx   = d.bx - w.x;
+            const wdy   = screenY - w.y;
+            const wdist = Math.sqrt(wdx * wdx + wdy * wdy);
+            const wang  = Math.atan2(wdy, wdx);
+            const fade  = Math.max(0, 1 - wdist / WAVE_MAX_RADIUS);
+            const delta = wdist - w.radius;
+            
+            if (Math.abs(delta) < WAVE_WIDTH) {
+              const bell  = Math.exp(-(delta * delta) / (2 * (WAVE_WIDTH * 0.35) ** 2));
+              const force = bell * fade * WAVE_INTENSITY;
+              wx += Math.cos(wang) * force;
+              wy += Math.sin(wang) * force;
+              if (bell > maxWavePresence) {
+                maxWavePresence = bell;
+                let energy = fade * Math.min(1, WAVE_INTENSITY / 6.0);
+                finalWaveColor = energy > 0.6
+                  ? lerpColor(COLOR_WAVE_LIGHT, COLOR_WAVE_DARK, (energy - 0.6) / 0.4)
+                  : lerpColor(COLOR_WHITE, COLOR_WAVE_LIGHT, energy / 0.6);
+              }
+            }
+            
+            for (const offset of RIPPLE_OFFSETS) {
+              const rRadius = w.radius + offset;
+              if (rRadius < 0) continue;
+              const rdelta = wdist - rRadius;
+              if (Math.abs(rdelta) < RIPPLE_WIDTH * 2.5) {
+                const rbell  = Math.exp(-(rdelta * rdelta) / (2 * (RIPPLE_WIDTH * 0.5) ** 2));
+                wx += Math.cos(wang) * rbell * fade * RIPPLE_INTENSITY;
+                wy += Math.sin(wang) * rbell * fade * RIPPLE_INTENSITY;
+                if (rbell > maxRipplePresence) maxRipplePresence = rbell;
+              }
+            }
+          }
+          
+          const x = d.bx + nx + px + wx;
+          const y = screenY  + ny + py + wy;
+          
+          let color = COLOR_WHITE;
+          if (dist < COLOR_RADIUS) color = lerpColor(COLOR_WHITE, COLOR_CENTER, smoothstep(1 - dist / COLOR_RADIUS));
+          if (maxWavePresence > 0.01) color = lerpColor(color, finalWaveColor, maxWavePresence);
+          if (maxRipplePresence > 0.01) color = lerpColor(color, COLOR_RIPPLE, maxRipplePresence * RIPPLE_COLOR_MIX);
+          
+          const [cr, cg, cb] = color;
+          
+          ctx.beginPath();
+          ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+          ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      
+      resize();
+      window.addEventListener('resize', resize);
+      requestAnimationFrame(draw);
+    })();
+    </script>
+</body>
+</html>
