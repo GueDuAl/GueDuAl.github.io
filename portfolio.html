@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Portafolio - Alvaro Guerrero Duarte</title>
+    <link rel="icon" href="imagenes/icono.png" />
+    
+    <!-- Cargando fuentes modernas y Tailwind CSS para un diseño profesional -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.16/typed.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#ff6347', // Sunset Orange/Tomato
+                        secondary: '#1d6fbd', // Deep Blue
+                        accent: '#ffb347',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Estilos globales y barra de scroll personalizada */
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 9999px;
+            border: 2px solid #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff6347;
+        }
+
+        /* Efectos de perspectiva para el renderizado del nombre en 3D */
+        #hero-name {
+            display: inline-block;
+            perspective: 1000px;
+        }
+        .name-char {
+            display: inline-block;
+            transform-origin: center bottom;
+            opacity: 0;
+            color: #ff6347;
+            text-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
+        }
+        .typed-cursor { 
+            color: #ff6347; 
+            font-weight: 300; 
+        }
+
+        /* Clases de transiciones con Intersection Observer */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Estilos decorativos para tarjetas de habilidades */
+        .skill-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-bottom: 3px solid transparent;
+        }
+        .skill-card:hover {
+            border-bottom-color: #ff6347;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 99, 71, 0.15);
+            background-color: rgba(30, 41, 59, 0.5);
+        }
+
+        /* Indicador de progreso de lectura */
+        #scroll-progress {
+            position: fixed;
+            top: 0; 
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(90deg, #ff6347, #1d6fbd);
+            z-index: 100;
+            transition: width 0.1s linear;
+        }
+
+        /* Animación inicial para elementos de logros */
+        .achievements-list li {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            border-left: 3px solid #1e293b;
+            transition: border-color 0.3s ease;
+        }
+        .achievements-list li:hover {
+            border-left-color: #ff6347 !important;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-[#ff6347]/30 selection:text-white">
+
+    <div id="scroll-progress"></div>
+    
+    <header class="fixed top-0 left-0 w-full z-50 bg-[#0b0f19]/80 backdrop-blur-lg border-b border-slate-900 transition-all duration-300">
+        <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="logo text-lg md:text-xl font-bold tracking-wider">
+                <a href="#inicio" class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary hover:opacity-80 transition-opacity">
+                    Alvaro Media
+                </a>
+            </h1>
+            <div class="flex items-center gap-6">
+                <ul class="flex space-x-6 text-sm font-medium tracking-wide">
+                    <li><a href="#inicio" class="nav-link text-slate-300 hover:text-primary transition-colors active text-primary">Inicio</a></li>
+                    <li><a href="#about" class="nav-link text-slate-300 hover:text-primary transition-colors">Sobre mí</a></li>
+                    <li><a href="#experience" class="nav-link text-slate-300 hover:text-primary transition-colors">Experiencia</a></li>
+                </ul>
+                <button id="lang-toggle" class="px-3 py-1 text-xs font-semibold border border-slate-800 rounded-md hover:border-primary hover:text-primary transition-all bg-slate-950/40 text-slate-300">
+                    EN
+                </button>
+            </div>
+        </nav>
+    </header>
+        
+    <section id="inicio" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <!-- Canvas para partículas interactivas -->
+        <canvas id="particles" class="absolute inset-0 w-full h-full pointer-events-auto z-0"></canvas>
+        
+        <!-- Contenido textual del Hero -->
+        <div class="relative z-10 text-center max-w-4xl px-6 flex flex-col items-center">
+            <h2 class="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
+                <span id="hero-greeting" class="text-slate-400 font-light block md:inline">Hola, soy</span> 
+                <span class="highlight inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent" id="hero-name">Alvaro Guerrero Duarte</span>
+            </h2>
+            <h3 class="text-xl md:text-2xl text-slate-300 font-medium tracking-wide mb-6">
+                Desarrollador Multiplataforma y Diseñador Web
+            </h3>
+            
+            <!-- Contenedor del subtítulo animado con Typed.js -->
+            <div class="min-h-[50px] mb-8">
+                <p id="typed-subtitle" class="text-slate-400 text-base md:text-lg max-w-2xl leading-relaxed"></p>
+                <p style="display:none" id="hero-static-p">Me encanta crear aplicaciones y sitios web interactivos, modernos y eficientes.</p>
+            </div>
+            
+            <a href="#about" class="px-8 py-3.5 bg-gradient-to-r from-primary to-accent text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 cta">
+                Sobre mí
+            </a>
+        </div>
+        
+        <!-- Indicador visual de Scroll down -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-40 z-10">
+            <span class="text-xs font-semibold tracking-widest text-slate-400 uppercase">Scroll</span>
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </section>
+
+    <section id="about" class="relative py-24 md:py-32 bg-slate-950 border-t border-slate-900">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-12 gap-12 items-center">
+                
+                <!-- Contenedor de la Imagen con Efecto de Glitch -->
+                <div class="md:col-span-4 flex justify-center">
+                    <div class="about-image-container reveal relative w-56 h-56 md:w-64 md:h-64 rounded-3xl overflow-hidden border-2 border-slate-800 shadow-2xl shadow-primary/5">
+                        <img id="glitch-image" src="imagenes/yo.jpg" alt="Alvaro Guerrero" class="about-image glitch-effect w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x400/1e293b/ffffff?text=Alvaro';">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-40"></div>
+                    </div>
+                </div>
+                
+                <!-- Información personal -->
+                <div class="md:col-span-8 space-y-6">
+                    <div class="reveal">
+                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+                            <a id="about-pdf-link" class="hover:text-primary transition-colors">Sobre Mí</a>
+                        </h2>
+                        <div class="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
+                    </div>
+                    
+                    <div class="space-y-4 text-slate-300 text-base md:text-lg leading-relaxed">
+                        <p id="about-p1" class="reveal">
+                            Soy un programador junior con gran capacidad de aprendizaje rápido y mentalidad creativa, siempre buscando soluciones innovadoras a los
+                        </p>
+                        <p id="about-p2" class="reveal">
+                            desafíos técnicos. Me caracterizo por mi perseverancia y compromiso: cuando me propongo un objetivo, me aseguro de cumplirlo con excelencia.
+                        </p>
+                    </div>
+                    
+                    <div class="pt-4 reveal">
+                        <a href="imagenes/CV-Alvaro_Guerrero_Duarte.pdf" class="cv-button inline-flex items-center gap-3 px-6 py-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 hover:text-white hover:border-primary hover:bg-slate-900/50 shadow-md transition-all duration-300" target="_blank">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Mi currículum</span>
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="py-24 md:py-32 bg-slate-900/40 relative border-t border-slate-900">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">Experiencia y Formación</h2>
+                <div class="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto"></div>
+            </div>
+            
+            <div class="achievements-columns grid md:grid-cols-2 gap-8 md:gap-12">
+                <!-- Columna Izquierda -->
+                <ul class="achievements-list reveal-left space-y-6">
+                    <li style="--i:0" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🇬🇧</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Licencia B2 de Inglés</h4>
+                                <p class="text-slate-400 text-sm">Certificado oficial de nivel B2.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:1" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🚗</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Carnet conducir B</h4>
+                                <p class="text-slate-400 text-sm">Disponibilidad para viajar y desplazarse.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:2" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🌐</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Redes</h4>
+                                <p class="text-slate-400 text-sm">Certificado Cisco Packet Tracer (curso completado).</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:3" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🛸</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Piloto Aplicador de Drones</h4>
+                                <p class="text-slate-400 text-sm">Actualmente sacándome el título oficial.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:4" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🎓</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">IFCT0108</h4>
+                                <p class="text-slate-400 text-sm">Actualmente sacándome el título oficial.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:5" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">☁️</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-2">AWS Academy Graduate – Cloud Foundations</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">
+                                    Certificación de AWS Academy sobre fundamentos de cloud computing, arquitectura básica en AWS y uso de servicios como EC2, S3, RDS e IAM.
+                                </p>
+                                <a href="https://www.credly.com/go/6L60NVQj" target="_blank" class="inline-flex items-center gap-1.5 mt-3 text-xs text-primary hover:underline font-semibold">
+                                    <span>Ver certificado</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                
+                <!-- Columna Derecha -->
+                <ul class="achievements-list reveal-right space-y-6">
+                    <li style="--i:0" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">📚</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Educación</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">ESO, Bachillerato, Selectividad, FP Superior en DAM, FP Superior en DAW (actualmente sacándome el título oficial).</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:1" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🖥️</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Servidores propios</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">Servidor propio en el que estamos situados (alvaroguerrero.es).</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:2" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🤝</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Scrum Master</h4>
+                                <p class="text-slate-400 text-sm">Gran experiencia en Scrum Master.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:3" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">🔧</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">ERP y herramientas</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">Git, Odoo, Office, Apache, Docker, AWS.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li style="--i:4" class="p-6 bg-slate-950/50 rounded-2xl border border-slate-900/80 shadow-sm">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-2xl mt-0.5">💻</span>
+                            <div>
+                                <h4 class="font-bold text-slate-100 text-lg mb-1">Lenguajes de programación</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">C, Java, JavaScript, Kotlin, Python, PHP, HTML5, CSS, XML, JSON, SQL, FXML.</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-24 md:py-32 bg-slate-950 relative border-t border-slate-900">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">Mis Habilidades</h2>
+                <div class="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto mb-6"></div>
+                <p class="text-slate-400 text-base leading-relaxed">
+                    A lo largo de mi formación, he adquirido una sólida base en múltiples tecnologías y herramientas tanto de desarrollo multiplataforma como de diseño web. A continuación, algunas de las habilidades más destacadas:
+                </p>
+            </div>
+            
+            <div class="skills-list grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Skill 1 -->
+                <div class="skill skill-card p-8 bg-slate-900/40 border border-slate-900 rounded-3xl reveal" style="transition-delay:0s">
+                    <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-3">Java & C#</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Lenguajes orientados a objetos que utilizo para crear aplicaciones robustas y escalables.</p>
+                </div>
+                <!-- Skill 2 -->
+                <div class="skill skill-card p-8 bg-slate-900/40 border border-slate-900 rounded-3xl reveal" style="transition-delay:0.12s">
+                    <div class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-3">HTML, CSS & JS</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Conocimiento avanzado en tecnologías web para crear interfaces interactivas y visualmente atractivas.</p>
+                </div>
+                <!-- Skill 3 -->
+                <div class="skill skill-card p-8 bg-slate-900/40 border border-slate-900 rounded-3xl reveal" style="transition-delay:0.24s">
+                    <div class="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-3">Diseño UI/UX</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Experiencia en diseño centrado en el usuario, creando interfaces intuitivas y agradables.</p>
+                </div>
+                <!-- Skill 4 -->
+                <div class="skill skill-card p-8 bg-slate-900/40 border border-slate-900 rounded-3xl reveal" style="transition-delay:0.36s">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.516a10.02 10.02 0 01-3.218-3.183m3.218 3.183a8.25 8.25 0 001.238-1.044m-1.238 1.044L9 14M3 9h12a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2v-7a2 2 0 012-2zm2-2H3M3 13h12M15 9h3a2 2 0 012 2v7a2 2 0 01-2 2h-3"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-3">Inglés & Francés</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Capacidad de comunicación fluida en inglés y conocimientos básicos de francés, ideal para colaborar en proyectos internacionales.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-24 bg-slate-900/30 border-t border-slate-900">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">Mis redes sociales</h2>
+            <div class="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto mb-12"></div>
+            
+            <div class="social-media flex flex-wrap justify-center gap-6">
+                <!-- X (Twitter) -->
+                <a href="https://x.com/AlvaroGuerrero" target="_blank" class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center hover:border-primary hover:-translate-y-1.5 transition-all duration-300 shadow-lg shadow-black/40 group">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                    </svg>
+                </a>
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/alvaroguerreroduarte/" target="_blank" class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center hover:border-primary hover:-translate-y-1.5 transition-all duration-300 shadow-lg shadow-black/40 group">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+                <!-- Facebook -->
+                <a href="https://www.facebook.com/alvaro.guerreroduarte/" target="_blank" class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center hover:border-primary hover:-translate-y-1.5 transition-all duration-300 shadow-lg shadow-black/40 group">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.8z"></path>
+                    </svg>
+                </a>
+                <!-- Github -->
+                <a href="https://github.com/AlvaroGuerreroDuarte" target="_blank" class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center hover:border-primary hover:-translate-y-1.5 transition-all duration-300 shadow-lg shadow-black/40 group">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+                    </svg>
+                </a>
+                <!-- Linkedin -->
+                <a href="https://www.linkedin.com/in/alvaro-guerrero-duarte/" target="_blank" class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center hover:border-primary hover:-translate-y-1.5 transition-all duration-300 shadow-lg shadow-black/40 group">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="py-12 bg-slate-950 text-center border-t border-slate-900">
+        <p class="text-sm text-slate-500 font-medium tracking-wide">&copy; 2025-2026 Alvaro Guerrero Duarte.</p>
+    </footer>
+
+    <script>
+    // Configuración multilenguaje
+    const translations = {
+        es: {
+            inicio: "Inicio",
+            proyectos: "Proyectos",
+            contacto: "Contacto",
+            heroGreeting: "Hola, soy",
+            heroSub: "Desarrollador Multiplataforma y Diseñador Web",
+            heroText: "Me encanta crear aplicaciones y sitios web interactivos, modernos y eficientes.",
+            cta: "Sobre mí",
+            aboutPDF: "Sobre Mí",
+            aboutPDFHref: "imagenes/CV-Alvaro_Guerrero_Duarte.pdf",
+            cvButton: "Mi currículum",
+            aboutP1: "Soy un programador junior con gran capacidad de aprendizaje rápido y mentalidad creativa, siempre buscando soluciones innovadoras a los",
+            aboutP2: "desafíos técnicos. Me caracterizo por mi perseverancia y compromiso: cuando me propongo un objetivo, me aseguro de cumplirlo con excelencia.",
+            achievements: "Experiencia y Formación",
+            licenciaIngles: "<strong>Licencia B2 de Inglés:</strong> Certificado oficial de nivel B2.",
+            carnetConducir: "<strong>Carnet conducir B:</strong> Disponibilidad para viajar y desplazarse.",
+            redes: "<strong>Redes:</strong> Certificado Cisco Packet Tracer (curso completado).",
+            pilotoDrones: "<strong>Piloto Aplicador de Drones:</strong> Actualmente sacándome el título oficial.",
+            ifct0108: "<strong>IFCT0108</strong> Actualmente sacándome el título oficial.",
+            aws: "<strong>AWS Academy Graduate – Cloud Foundations:</strong> Certificación de AWS Academy sobre fundamentos de cloud computing, arquitectura básica en AWS y uso de servicios como EC2, S3, RDS e IAM. <a href='https://www.credly.com/go/6L60NVQj' target='_blank' class='inline-flex items-center gap-1 mt-1 text-primary hover:underline'>(Ver certificado)</a>",
+            educacion: "<strong>Educación:</strong> ESO, Bachillerato, Selectividad, FP Superior en DAM, FP Superior en DAW (actualmente sacándome el título oficial)",
+            servidores: "<strong>Servidores propios:</strong> Servidor propio en el que estamos situados (alvaroguerrero.es).",
+            scrum: "<strong>Scrum Master</strong> Gran experiencia en Scrum Master.",
+            herramientas: "<strong>ERP y herramientas:</strong> Git, Odoo, Office, Apache, Docker, AWS.",
+            lenguajes: "<strong>Lenguajes de programación:</strong> C, Java, JavaScript, Kotlin, Python, PHP, HTML5, CSS, XML, JSON, SQL, FXML.",
+            skillsTitle: "Mis Habilidades",
+            skillsP: "A lo largo de mi formación, he adquirido una sólida base en múltiples tecnologías y herramientas tanto de desarrollo multiplataforma como de diseño web. A continuación, algunas de las habilidades más destacadas:",
+            javaCsharp: "<strong>Java & C#</strong>",
+            javaCsharpDesc: "Lenguajes orientados a objetos que utilizo para crear aplicaciones robustas y escalables.",
+            webTech: "<strong>HTML, CSS & JavaScript</strong>",
+            webTechDesc: "Conocimiento avanzado en tecnologías web para crear interfaces interactivas y visualmente atractivas.",
+            design: "<strong>Diseño UI/UX</strong>",
+            designDesc: "Experiencia en diseño centrado en el usuario, creando interfaces intuitivas y agradables.",
+            languages: "<strong>Inglés y Francés</strong>",
+            languagesDesc: "Capacidad de comunicación fluida en inglés y conocimientos básicos de francés, ideal para colaborar en proyectos internacionales.",
+            contactTitle: "Mis redes sociales:",
+            copyright: "&copy; 2025-2026 Alvaro Guerrero Duarte."
+        },
+        en: {
+            inicio: "Home",
+            proyectos: "Projects",
+            contacto: "Contact",
+            heroGreeting: "Hello, I'm",
+            heroSub: "Multiplatform Developer & Web Designer",
+            heroText: "I love creating interactive, modern, and efficient applications and websites.",
+            cta: "About Me",
+            aboutPDF: "About Me",
+            aboutPDFHref: "imagenes/CV-Alvaro_Guerrero_Duarte.pdf",
+            cvButton: "My resume",
+            aboutP1: "I am a junior programmer with strong rapid learning capabilities and a creative mindset, always seeking innovative solutions to",
+            aboutP2: "technical challenges. I am characterized by my perseverance and commitment: when I set a goal, I ensure to achieve it with excellence.",
+            achievements: "Experience & Education",
+            licenciaIngles: "<strong>B2 English License:</strong> Official B2 level certificate.",
+            carnetConducir: "<strong>Driver's License B:</strong> Availability to travel and commute.",
+            redes: "<strong>Networks:</strong> Cisco Packet Tracer certificate (completed course).",
+            pilotoDrones: "<strong>Drone Applicator Pilot:</strong> Currently obtaining the official license.",
+            ifct0108: "<strong>IFCT0108</strong> Currently obtaining the official certificate.",
+            aws: "<strong>AWS Academy Graduate – Cloud Foundations:</strong> AWS Academy certification covering cloud computing fundamentals, AWS architecture basics and services such as EC2, S3, RDS and IAM. <a href='https://www.credly.com/go/6L60NVQj' target='_blank' class='inline-flex items-center gap-1 mt-1 text-primary hover:underline'>(View certificate)</a>",
+            educacion: "<strong>Education:</strong> ESO, Baccalaureate, University Entrance Exam, Higher Vocational Training in Multiplatform Application Development, Higher Vocational Training in Web Application Development (currently obtaining the official title)",
+            servidores: "<strong>Own Servers:</strong> Our own server where we are located (alvaroguerrero.es).",
+            scrum: "<strong>Scrum Master</strong> Extensive experience as Scrum Master.",
+            herramientas: "<strong>ERP and tools:</strong> Git, Odoo, Office, Apache, Docker, AWS.",
+            lenguajes: "<strong>Programming Languages:</strong> C, Java, JavaScript, Kotlin, Python, PHP, HTML5, CSS, XML, JSON, SQL, FXML.",
+            skillsTitle: "My Skills",
+            skillsP: "Throughout my training, I have acquired a solid foundation in multiple technologies and tools for both multiplatform development and web design. Below are some of my most notable skills:",
+            javaCsharp: "<strong>Java & C#</strong>",
+            javaCsharpDesc: "Object-oriented languages I use to create robust and scalable applications.",
+            webTech: "<strong>HTML, CSS & JavaScript</strong>",
+            webTechDesc: "Advanced knowledge in web technologies to create interactive and visually appealing interfaces.",
+            design: "<strong>UI/UX Design</strong>",
+            designDesc: "Experience in user-centered design, creating intuitive and pleasant interfaces.",
+            languages: "<strong>English and French</strong>",
+            languagesDesc: "Fluent communication skills in English and basic knowledge of French, ideal for collaborating on international projects.",
+            contactTitle: "My social media:",
+            copyright: "&copy; 2025-2026 Alvaro Guerrero Duarte."
+        }
+    };
+
+    function setLanguage(lang) {
+        document.querySelectorAll('nav ul li')[0].querySelector('a').textContent = translations[lang].inicio;
+        document.querySelectorAll('nav ul li')[1].querySelector('a').textContent = translations[lang].cta;
+        document.querySelectorAll('nav ul li')[2].querySelector('a').textContent = translations[lang].achievements.split(" ")[0];
+        document.getElementById('hero-greeting').textContent = translations[lang].heroGreeting;
+        document.querySelector('#inicio h3').textContent = translations[lang].heroSub;
+        document.querySelector('#hero-static-p').textContent = translations[lang].heroText;
+        document.querySelector('.cta').textContent = translations[lang].cta;
+        
+        const aboutPdfLink = document.getElementById('about-pdf-link');
+        if (aboutPdfLink) {
+            aboutPdfLink.textContent = translations[lang].aboutPDF;
+            aboutPdfLink.setAttribute('href', translations[lang].aboutPDFHref);
+            aboutPdfLink.setAttribute('target', '_blank');
+        }
+        
+        const cvBtn = document.querySelector('.cv-button span');
+        if (cvBtn) {
+            cvBtn.textContent = translations[lang].cvButton;
+        }
+        const cvLink = document.querySelector('.cv-button');
+        if (cvLink) {
+            cvLink.setAttribute('href', translations[lang].aboutPDFHref);
+        }
+        
+        document.getElementById('about-p1').textContent = translations[lang].aboutP1;
+        document.getElementById('about-p2').textContent = translations[lang].aboutP2;
+        document.querySelector('#experience h2').textContent = translations[lang].achievements;
+        
+        const achievementsList1 = document.querySelectorAll('.achievements-columns .achievements-list')[0];
+        achievementsList1.querySelectorAll('li')[0].querySelector('p').innerHTML = translations[lang].licenciaIngles.split(':</strong>')[1] || translations[lang].licenciaIngles;
+        achievementsList1.querySelectorAll('li')[0].querySelector('h4').innerHTML = translations[lang].licenciaIngles.split(':</strong>')[0].replace('<strong>', '') || 'English B2';
+        achievementsList1.querySelectorAll('li')[1].querySelector('p').innerHTML = translations[lang].carnetConducir.split(':</strong>')[1] || translations[lang].carnetConducir;
+        achievementsList1.querySelectorAll('li')[2].querySelector('p').innerHTML = translations[lang].redes.split(':</strong>')[1] || translations[lang].redes;
+        achievementsList1.querySelectorAll('li')[3].querySelector('p').innerHTML = translations[lang].pilotoDrones.split(':</strong>')[1] || translations[lang].pilotoDrones;
+        achievementsList1.querySelectorAll('li')[4].querySelector('p').innerHTML = translations[lang].ifct0108.replace('<strong>', '').replace('</strong>', '');
+        achievementsList1.querySelectorAll('li')[5].querySelector('p').innerHTML = translations[lang].aws.split('</h4>')[1] || translations[lang].aws;
+        
+        const achievementsList2 = document.querySelectorAll('.achievements-columns .achievements-list')[1];
+        achievementsList2.querySelectorAll('li')[0].querySelector('p').innerHTML = translations[lang].educacion.split(':</strong>')[1] || translations[lang].educacion;
+        achievementsList2.querySelectorAll('li')[1].querySelector('p').innerHTML = translations[lang].servidores.split(':</strong>')[1] || translations[lang].servidores;
+        achievementsList2.querySelectorAll('li')[2].querySelector('p').innerHTML = translations[lang].scrum.replace('<strong>', '').replace('</strong>', '');
+        achievementsList2.querySelectorAll('li')[3].querySelector('p').innerHTML = translations[lang].herramientas.split(':</strong>')[1] || translations[lang].herramientas;
+        achievementsList2.querySelectorAll('li')[4].querySelector('p').innerHTML = translations[lang].lenguajes.split(':</strong>')[1] || translations[lang].lenguajes;
+        
+        document.querySelector('#skills h2').textContent = translations[lang].skillsTitle;
+        document.querySelector('#skills p').textContent = translations[lang].skillsP;
+        
+        const skillsList = document.querySelectorAll('.skill');
+        skillsList[0].querySelector('h3').innerHTML = translations[lang].javaCsharp.replace('<strong>', '').replace('</strong>', '');
+        skillsList[0].querySelector('p').textContent = translations[lang].javaCsharpDesc;
+        skillsList[1].querySelector('h3').innerHTML = translations[lang].webTech.replace('<strong>', '').replace('</strong>', '');
+        skillsList[1].querySelector('p').textContent = translations[lang].webTechDesc;
+        skillsList[2].querySelector('h3').innerHTML = translations[lang].design.replace('<strong>', '').replace('</strong>', '');
+        skillsList[2].querySelector('p').textContent = translations[lang].designDesc;
+        skillsList[3].querySelector('h3').innerHTML = translations[lang].languages.replace('<strong>', '').replace('</strong>', '');
+        skillsList[3].querySelector('p').textContent = translations[lang].languagesDesc;
+        
+        document.querySelector('#contact h2').textContent = translations[lang].contactTitle;
+        document.querySelector('footer p').innerHTML = translations[lang].copyright;
+        
+        document.getElementById("lang-toggle").textContent = lang === "es" ? "EN" : "ES";
+        localStorage.setItem("lang", lang);
+    }
+
+    let currentLang = localStorage.getItem("lang") || "es";
+    setLanguage(currentLang);
+    
+    document.getElementById("lang-toggle").addEventListener("click", () => {
+        currentLang = currentLang === "es" ? "en" : "es";
+        setLanguage(currentLang);
+    });
+    </script>
+
+    <script>
+    window.addEventListener("load", () => {
+        setTimeout(() => {
+            resizeCanvas();
+            animate();
+        }, 50);
+    });
+
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+        if(canvas.parentElement) {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        }
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('scroll', resizeCanvas);
+    resizeCanvas();
+
+    let NUM_POINTS = 160;
+    let LINK_RADIUS = 200;
+    if (window.innerWidth <= 768) {
+        NUM_POINTS = 60;
+        LINK_RADIUS = 120;
+    }
+    const POINT_RADIUS = 1.8;
+    const MOUSE_RADIUS = 90;
+    const points = [];
+    let mouse = { x: null, y: null };
+
+    // Crear puntos distribuidos aleatoriamente
+    for (let i = 0; i < NUM_POINTS; i++) {
+        const isRed = Math.random() < 0.20;
+        const color = isRed ? `rgb(255, 99, 71)` : `rgb(29, 111, 189)`;
+        points.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            color: color
+        });
+    }
+
+    window.addEventListener("mousemove", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+
+    window.addEventListener("mouseleave", () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = points.length - 1; i >= 0; i--) {
+            const p = points[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            // Tratamiento de burbujas creadas al clickar
+            if (p.burst) {
+                p.life--;
+                if (p.life <= 0) { points.splice(i, 1); continue; }
+                const alpha = p.life / 120;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, POINT_RADIUS * 2, 0, Math.PI * 2);
+                ctx.fillStyle = p.color.replace("rgb", "rgba").replace(")", `, ${alpha})`);
+                ctx.fill();
+                continue;
+            }
+            
+            // Rebotes en los bordes
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, POINT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = p.color.replace("rgb", "rgba").replace(")", `, 0.75)`);
+            ctx.fill();
+            
+            // Conexiones de los puntos con el puntero del ratón
+            if (mouse.x !== null) {
+                const dx = p.x - mouse.x;
+                const dy = p.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < MOUSE_RADIUS) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.strokeStyle = `rgba(255, 99, 71, ${1 - dist / MOUSE_RADIUS})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+            
+            // Conexiones estructurales entre partículas cercanas
+            for (let j = i + 1; j < points.length; j++) {
+                const p2 = points[j];
+                if (p2.burst) continue;
+                const mx = (p.x + p2.x) / 2;
+                const my = (p.y + p2.y) / 2;
+                const dxm = mx - (mouse.x || 0);
+                const dym = my - (mouse.y || 0);
+                const distMouse = Math.sqrt(dxm * dxm + dym * dym);
+                if (mouse.x !== null && distMouse < LINK_RADIUS) {
+                    const dx2 = p.x - p2.x;
+                    const dy2 = p.y - p2.y;
+                    const distPoints = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                    if (distPoints < 110) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(30, 41, 59, ${(1 - distPoints/110) * 0.4})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+    </script>
+
+    <script>
+    const glitchImage = document.getElementById('glitch-image');
+    const images = ['imagenes/yo.jpg', 'imagenes/218664.png'];
+    let currentImageIndex = 0;
+    
+    // Inserción de estilos dinámicos de simulación glitch
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .glitch-effect {
+        position: relative;
+      }
+      .glitch-effect.active {
+        animation: glitch-flicker 0.4s;
+      }
+      @keyframes glitch-flicker {
+        0% { clip-path: inset(0 0 0 0); filter: hue-rotate(0deg); }
+        10% { clip-path: inset(10% 0 85% 0); transform: translate(-2px, -2px); filter: hue-rotate(90deg); }
+        20% { clip-path: inset(20% 0 70% 0); transform: translate(2px, 2px); filter: hue-rotate(180deg); }
+        30% { clip-path: inset(15% 0 75% 0); transform: translate(-1px, 1px); filter: hue-rotate(270deg); }
+        40% { clip-path: inset(25% 0 65% 0); transform: translate(1px, -1px); filter: hue-rotate(360deg); }
+        50% { clip-path: inset(5% 0 90% 0); transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+        100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); filter: hue-rotate(0deg); }
+      }
+      .glitch-effect.active::before {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(255, 0, 0, 0.2); animation: glitch-bg 0.4s; pointer-events: none; mix-blend-mode: screen;
+      }
+      @keyframes glitch-bg {
+        0% { background-color: rgba(255, 0, 0, 0.3); }
+        50% { background-color: rgba(0, 255, 255, 0.3); }
+        100% { background-color: rgba(255, 0, 0, 0); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    function cycleImages() {
+        if(glitchImage) {
+            glitchImage.classList.remove('active');
+            setTimeout(() => {
+                glitchImage.classList.add('active');
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                // Intentamos cambiar la imagen (solo si existe o tiene fallback activo)
+                glitchImage.src = images[currentImageIndex];
+                setTimeout(() => {
+                    glitchImage.classList.remove('active');
+                    cycleImages();
+                }, 400);
+            }, 3500);
+        }
+    }
+    cycleImages();
+    </script>
+    
+    <script>
+    // Barra de progreso de lectura (superior)
+    const bar = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', () => {
+        const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+        bar.style.width = Math.min(pct, 100) + '%';
+    });
+
+    // Cargar textos de Typed.js
+    const typedStrings = {
+        es: [
+            'Me encanta crear aplicaciones y sitios web interactivos, modernos y eficientes.',
+            'Siempre buscando soluciones innovadoras a los desafíos técnicos.',
+            'Desarrollador apasionado por el diseño y la tecnología.',
+            '¡Holaaa! Si estás leyendo esto, gracias por tu visita :)'
+        ],
+        en: [
+            'I love creating interactive, modern, and efficient applications and websites.',
+            'Always seeking innovative solutions to technical challenges.',
+            'A developer passionate about design and technology.',
+            'Hellooo! If you are reading this, thanks for visiting :)'
+        ]
+    };
+
+    let typedInstance = null;
+    function initTyped(lang) {
+        if (typedInstance) {
+            typedInstance.destroy();
+            document.getElementById('typed-subtitle').innerHTML = '';
+        }
+        typedInstance = new Typed('#typed-subtitle', {
+            strings: typedStrings[lang] || typedStrings['es'],
+            typeSpeed: 38,
+            backSpeed: 18,
+            backDelay: 2200,
+            loop: true,
+            smartBackspace: true,
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const initLang = localStorage.getItem('lang') || 'es';
+        initTyped(initLang);
+    });
+
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+        setTimeout(() => initTyped(currentLang), 0);
+    });
+
+    // Observer para transiciones suaves al visualizar secciones
+    const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    // Animaciones secuenciales (Stagger) de las listas de logros usando Anime.js
+    const cardLists = document.querySelectorAll('.achievements-list');
+    const cardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const cards = entry.target.querySelectorAll('li');
+            anime({
+                targets: cards,
+                opacity: [0, 1],
+                translateY: [35, 0],
+                scaleX: [0.93, 1],
+                scaleY: [0.93, 1],
+                duration: 600,
+                delay: anime.stagger(100, { easing: 'easeOutQuad' }),
+                easing: 'easeOutExpo',
+                complete: () => {
+                    anime({
+                        targets: cards,
+                        scale: [
+                            { value: 1.03, duration: 150, easing: 'easeOutSine' },
+                            { value: 1,    duration: 220, easing: 'easeOutBounce' }
+                        ],
+                        delay: anime.stagger(80, { easing: 'easeInOutQuad' }),
+                    });
+                }
+            });
+            cardObserver.unobserve(entry.target);
+        });
+    }, { threshold: 0.05 });
+    cardLists.forEach(list => cardObserver.observe(list));
+
+    // Explosión de partículas reactiva al hacer clic en el Hero
+    const heroSection = document.getElementById('inicio');
+    heroSection.addEventListener('click', (e) => {
+        const rect = heroSection.getBoundingClientRect();
+        const bx = e.clientX - rect.left;
+        const by = e.clientY - rect.top;
+        for (let i = 0; i < 10; i++) {
+            const angle = (Math.PI * 2 / 10) * i;
+            const speed = 2 + Math.random() * 2;
+            const isRed = Math.random() < 0.4;
+            points.push({
+                x: bx, y: by,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                color: isRed ? 'rgb(255, 99, 71)' : 'rgb(29, 111, 189)',
+                burst: true,
+                life: 100
+            });
+        }
+    });
+    </script>
+    
+    <script>
+    window.addEventListener('load', function() {
+        const nameEl = document.getElementById('hero-name');
+        if (!nameEl || typeof anime === 'undefined') return;
+        const text = nameEl.textContent;
+        nameEl.innerHTML = '';
+        [...text].forEach(char => {
+            const span = document.createElement('span');
+            span.className = 'name-char';
+            span.textContent = char === ' ' ? '\u00A0' : char;
+            nameEl.appendChild(span);
+        });
+        
+        const chars = nameEl.querySelectorAll('.name-char');
+        function runAnim() {
+            anime.set(chars, { opacity: 0, translateY: 60, rotateY: 90, scale: 0.5 });
+            anime({
+                targets: chars,
+                opacity: [0, 1],
+                translateY: [60, 0],
+                rotateY: [90, 0],
+                scale: [0.5, 1],
+                duration: 750,
+                delay: anime.stagger(40, { easing: 'easeOutQuad' }),
+                easing: 'easeOutExpo',
+                complete: () => {
+                    anime({
+                        targets: chars,
+                        color: [
+                            { value: '#ff6347', duration: 0 },
+                            { value: '#ffb347', duration: 350, delay: anime.stagger(25) },
+                            { value: '#ff6347', duration: 350, delay: anime.stagger(25) }
+                        ],
+                        delay: 300,
+                        complete: () => {
+                            anime({
+                                targets: chars,
+                                translateY: [
+                                    { value: -14, duration: 220, easing: 'easeOutSine' },
+                                    { value: 0,   duration: 380, easing: 'easeOutBounce' }
+                                ],
+                                delay: anime.stagger(30, { easing: 'easeInQuad' }),
+                                complete: () => {
+                                    setTimeout(() => {
+                                        anime({
+                                            targets: chars,
+                                            rotateY: [0, -90],
+                                            opacity: [1, 0],
+                                            translateY: [0, -40],
+                                            scale: [1, 0.4],
+                                            duration: 500,
+                                            delay: anime.stagger(20),
+                                            easing: 'easeInExpo',
+                                            complete: () => setTimeout(runAnim, 300)
+                                        });
+                                    }, 2500);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        runAnim();
+    });
+    </script>
+</body>
+</html>
