@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lujuria y Azar - Juego de Mesa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-red': '#ff003c',
+                        'neon-pink': '#ff00a0',
+                        'neon-purple': '#9d00ff',
+                        'dark-bg': '#0f0514',
+                        'panel-bg': 'rgba(25, 10, 30, 0.85)',
+                    },
+                    fontFamily: {
+                        'serif': ['Cinzel', 'serif'],
+                        'sans': ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0a020d;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(157, 0, 255, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 0, 60, 0.15), transparent 25%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(30, 10, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 0, 160, 0.3);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,0,160,0.1);
+        }
+
+        /* 3D Board Styles */
+        .board-container {
+            perspective: 1200px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            transform-style: preserve-3d;
+            transform: rotateX(25deg);
+            transition: transform 0.5s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .board-grid { grid-template-columns: repeat(8, 1fr); transform: rotateX(15deg); }
+        }
+        @media (max-width: 768px) {
+            .board-grid { grid-template-columns: repeat(5, 1fr); transform: rotateX(10deg); gap: 5px;}
+        }
+
+        .tile {
+            position: relative;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #2a0835, #1a0525);
+            border-radius: 8px;
+            border: 2px solid #4a154b;
+            box-shadow: 
+                0 10px 15px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .tile:hover {
+            transform: translateZ(10px) scale(1.05);
+            border-color: #ff00a0;
+            box-shadow: 0 15px 25px rgba(255,0,160,0.4);
+        }
+
+        .tile::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: #110216;
+            transform-origin: top;
+            transform: rotateX(-90deg);
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Tile Types Colors */
+        .tile-action { border-color: #ff003c; color: #ff88a0; }
+        .tile-help { border-color: #00ffcc; color: #88ffec; }
+        .tile-challenge { border-color: #ffaa00; color: #ffd480; }
+        .tile-secret { border-color: #9d00ff; color: #d699ff; }
+        .tile-duel { border-color: #ff00a0; color: #ff80d0; }
+        .tile-clothes { border-color: #ffffff; color: #dddddd; }
+
+        /* 3D Tokens */
+        .token {
+            position: absolute;
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 
+                0px 1px 0px #c0c0c0,
+                0px 2px 0px #b0b0b0,
+                0px 3px 0px #a0a0a0,
+                0px 4px 0px #909090,
+                0px 5px 10px rgba(0,0,0,0.8);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 10;
+            transform: translateZ(20px);
+            pointer-events: none;
+        }
+
+        .token-A { color: #00e5ff; text-shadow: 0 1px 0 #0099aa, 0 2px 0 #007788, 0 3px 0 #005566, 0 5px 10px rgba(0,229,255,0.5); }
+        .token-L { color: #ff00a0; text-shadow: 0 1px 0 #aa0066, 0 2px 0 #880044, 0 3px 0 #660033, 0 5px 10px rgba(255,0,160,0.5); }
+
+        /* 3D Dice */
+        .scene { width: 100px; height: 100px; perspective: 600px; margin: 0 auto; }
+        .cube {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(-50px);
+            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .cube.rolling { animation: roll 1s linear infinite; }
+        .cube__face {
+            position: absolute; width: 100px; height: 100px;
+            background: rgba(255, 0, 60, 0.9);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: white; font-weight: bold;
+        }
+        .cube__face--front  { transform: rotateY(  0deg) translateZ(50px); }
+        .cube__face--right  { transform: rotateY( 90deg) translateZ(50px); }
+        .cube__face--back   { transform: rotateY(180deg) translateZ(50px); }
+        .cube__face--left   { transform: rotateY(-90deg) translateZ(50px); }
+        .cube__face--top    { transform: rotateX( 90deg) translateZ(50px); }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        @keyframes roll {
+            0% { transform: translateZ(-50px) rotateX(0deg) rotateY(0deg); }
+            100% { transform: translateZ(-50px) rotateX(720deg) rotateY(1080deg); }
+        }
+
+        /* Cards Modal */
+        .card-reveal {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(0);
+        }
+        @keyframes popIn { to { transform: scale(1); } }
+
+        /* Inventory Drawer */
+        .inventory-drawer {
+            position: fixed; right: -400px; top: 0; height: 100%; width: 350px;
+            transition: right 0.3s ease; z-index: 50;
+        }
+        .inventory-drawer.open { right: 0; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a0525; }
+        ::-webkit-scrollbar-thumb { background: #ff00a0; border-radius: 4px; }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-200 min-h-screen flex flex-col">
+
+    <!-- Top HUD -->
+    <header class="glass-panel sticky top-0 z-40 p-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <h1 class="font-serif text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-red to-neon-purple drop-shadow-[0_0_10px_rgba(255,0,60,0.8)]">
+                Lujuria y Azar
+            </h1>
+        </div>
+        
+        <div class="flex gap-6 items-center">
+            <!-- Player Stats -->
+            <div id="player1-stats" class="text-center transition-all duration-300 transform scale-110 border-b-2 border-cyan-400 pb-1">
+                <span class="block text-sm text-cyan-400 font-bold">Jugador A</span>
+                <span class="text-xl"><i class="fas fa-tshirt"></i> <span id="p1-clothes">5</span></span>
+            </div>
+            <div class="text-xl font-bold text-gray-500">VS</div>
+            <div id="player2-stats" class="text-center transition-all duration-300 opacity-50">
+                <span class="block text-sm text-pink-500 font-bold">Jugador L</span>
+                <span class="text-xl"><i class="fas fa-tshirt"></i> <span id="p2-clothes">5</span></span>
+            </div>
+        </div>
+
+        <!-- Global Timer -->
+        <div class="glass-panel px-4 py-2 rounded-full flex items-center gap-3 border-neon-purple cursor-pointer hover:bg-white/5 transition" onclick="toggleTimerModal()">
+            <i class="fas fa-stopwatch text-neon-pink animate-pulse"></i>
+            <span id="global-timer" class="font-mono text-xl font-bold text-white">02:00</span>
+        </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="flex-grow relative overflow-hidden flex flex-col justify-center">
+        
+        <div class="board-container">
+            <div id="board" class="board-grid relative">
+                <!-- Tiles injected by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Controls -->
+    <footer class="glass-panel p-4 flex justify-between items-center z-30">
+        <button onclick="toggleInventory()" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-6 rounded-full font-bold border border-gray-600 transition flex items-center gap-2">
+            <i class="fas fa-briefcase"></i> Inventario de Cartas
+        </button>
+
+        <div class="flex flex-col items-center">
+            <div id="turn-indicator" class="text-sm font-bold text-cyan-400 mb-2 uppercase tracking-widest">Turno de A</div>
+            <button id="btn-roll" onclick="initiateDiceRoll()" class="bg-gradient-to-r from-neon-red to-neon-pink text-white py-3 px-10 rounded-full font-bold text-xl shadow-[0_0_20px_rgba(255,0,160,0.5)] hover:shadow-[0_0_30px_rgba(255,0,160,0.8)] transform hover:scale-105 transition">
+                <i class="fas fa-dice"></i> TIRAR DADOS
+            </button>
+        </div>
+
+        <button onclick="showRules()" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-6 rounded-full font-bold border border-gray-600 transition flex items-center gap-2">
+            <i class="fas fa-book"></i> Reglas
+        </button>
+    </footer>
+
+    
+    <!-- Dice Overlay -->
+    <div id="dice-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden">
+        <h2 class="font-serif text-3xl mb-8 text-white">Rodando suerte...</h2>
+        <div class="scene">
+            <div class="cube" id="cube">
+                <div class="cube__face cube__face--front">1</div>
+                <div class="cube__face cube__face--right">2</div>
+                <div class="cube__face cube__face--back">3</div>
+                <div class="cube__face cube__face--left">4</div>
+                <div class="cube__face cube__face--top">5</div>
+                <div class="cube__face cube__face--bottom">6</div>
+            </div>
+        </div>
+        <p id="dice-result-text" class="mt-8 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-pink to-neon-purple opacity-0 transition-opacity duration-300">Has sacado un X</p>
+    </div>
+
+    <!-- Card Reveal Modal -->
+    <div id="card-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div id="card-content" class="card-reveal w-full max-w-md bg-gradient-to-b from-gray-900 to-black border-2 rounded-2xl p-8 relative shadow-2xl flex flex-col items-center text-center">
+            <div id="card-icon" class="text-5xl mb-4"></div>
+            <h2 id="card-title" class="font-serif text-2xl mb-2 font-bold uppercase tracking-wider"></h2>
+            <div class="w-16 h-1 bg-current mb-6 opacity-50 rounded"></div>
+            <p id="card-desc" class="text-lg leading-relaxed mb-8 text-gray-300"></p>
+            
+            <!-- Specific to Duel -->
+            <div id="duel-advantage" class="hidden w-full bg-black/50 p-4 rounded border border-white/20 mb-6 text-sm text-gray-400">
+                <span class="font-bold text-white block mb-1">Ventaja de Carta de Ayuda:</span>
+                <span id="duel-adv-text"></span>
+            </div>
+
+            <button onclick="closeCardModal()" class="w-full py-3 rounded-full font-bold bg-white/10 hover:bg-white/20 border border-white/30 transition text-white">
+                Aceptar y Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Inventory Drawer -->
+    <div id="inventory-panel" class="inventory-drawer glass-panel flex flex-col">
+        <div class="p-4 border-b border-neon-purple/30 flex justify-between items-center">
+            <h3 class="font-serif text-xl font-bold text-white">Tu Inventario</h3>
+            <button onclick="toggleInventory()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div id="inventory-list" class="flex-grow overflow-y-auto p-4 space-y-3">
+            <!-- Cards populated by JS -->
+            <p class="text-gray-500 text-center italic mt-10">No tienes cartas en tu inventario.</p>
+        </div>
+    </div>
+
+    <!-- Timer Setup Modal -->
+    <div id="timer-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+        <div class="glass-panel p-8 rounded-2xl max-w-sm w-full text-center border-neon-pink">
+            <h3 class="font-serif text-2xl mb-6">Configurar Tiempo</h3>
+            <div class="flex justify-center gap-4 text-3xl font-mono mb-8">
+                <div class="flex flex-col items-center">
+                    <button onclick="adjustTimer(60)" class="text-gray-400 hover:text-white"><i class="fas fa-chevron-up"></i></button>
+                    <span id="timer-setup-min">02</span>
+                    <button onclick="adjustTimer(-60)" class="text-gray-400 hover:text-white"><i class="fas fa-chevron-down"></i></button>
+                </div>
+                <span>:</span>
+                <div class="flex flex-col items-center">
+                    <button onclick="adjustTimer(10)" class="text-gray-400 hover:text-white"><i class="fas fa-chevron-up"></i></button>
+                    <span id="timer-setup-sec">00</span>
+                    <button onclick="adjustTimer(-10)" class="text-gray-400 hover:text-white"><i class="fas fa-chevron-down"></i></button>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="toggleTimerModal()" class="flex-1 py-2 rounded bg-gray-700 hover:bg-gray-600">Cancelar</button>
+                <button onclick="startTimer()" class="flex-1 py-2 rounded bg-neon-pink text-white font-bold hover:bg-pink-600">Iniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal (replaces alert()) -->
+    <div id="alert-modal" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center hidden">
+        <div class="glass-panel p-6 rounded-xl max-w-sm w-full text-center border-white/50">
+            <p id="alert-text" class="text-lg mb-6"></p>
+            <button onclick="closeAlert()" class="bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full font-bold">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME DATA ---
+
+        const BOARD_SIZE = 40;
+        
+        // Define board templates (to be randomly distributed or patterned)
+        const TILE_TYPES = [
+            { type: 'action', text: "Beso francés", color: '#ff003c' },
+            { type: 'action', text: "Muestra una parte de tu cuerpo", color: '#ff003c' },
+            { type: 'help', text: "Carta de Ayuda", color: '#00ffcc', action: 'drawHelp' },
+            { type: 'clothes', text: "Quítate una prenda", color: '#ffffff', action: 'loseClothes' },
+            { type: 'action', text: "Beso de arriba a abajo", color: '#ff003c' },
+            { type: 'duel', text: "¡DUELO!", color: '#ff00a0', action: 'drawDuel' },
+            { type: 'action', text: "Tocar por debajo de la ropa", color: '#ff003c' },
+            { type: 'minigame', text: "Minijuego: Dados del Placer", color: '#ffaa00', action: 'miniGameDice' },
+            { type: 'challenge', text: "Carta de Reto", color: '#ffaa00', action: 'drawChallenge' },
+            { type: 'secret', text: "Reto Secreto", color: '#9d00ff', action: 'drawSecret' },
+            { type: 'action', text: "Retrocede 2 casillas", color: '#ff003c', action: 'moveBack2' },
+            { type: 'clothes', text: "Ambos os quitáis una prenda", color: '#ffffff', action: 'bothLoseClothes' },
+            { type: 'action', text: "Retrocede 1 o Avanza 2", color: '#ff003c', action: 'chooseMove' },
+            { type: 'clothes', text: "Quítale una prenda a tu pareja", color: '#ffffff', action: 'stealClothes' },
+            { type: 'action', text: "Masturba a tu pareja (2 min)", color: '#ff003c' },
+            { type: 'clothes', text: "Ambos os desnudáis (¡Cuidado!)", color: '#ffffff', action: 'naked' }, // Warning tile
+            { type: 'action', text: "Usa la lengua donde quieras", color: '#ff003c' },
+            { type: 'action', text: "Vuelve al inicio", color: '#ff003c', action: 'goStart' },
+        ];
+
+        const DECKS = {
+            help: [
+                "Te permite manipular tus dados una vez (válido para tablero o para minijuegos).",
+                "Durante el resto de la partida, cada vez que tu pareja obtenga un 1 en los dados, deberá quitarse una prenda o coger un reto secreto.",
+                "Te permite manipular los dados de tu pareja una vez.",
+                "Intercambia tu ficha de jugador con la de tu pareja en el tablero.",
+                "Haz que tu pareja haga lo que indica tu casilla en tu lugar.",
+                "Recibe una ventaja en un duelo.",
+                "Cambia el contenido de una casilla del tablero por lo que tú quieras.",
+                "Para un reto o duelo, podrás coger dos cartas del mazo y elegir con cuál te quedas.",
+                "En el siguiente turno, tu pareja no podrá avanzar y deberá repetir la indicación de su casilla actual.",
+                "Roba una carta de ayuda a tu pareja (si tiene).",
+                "Durante dos turnos, tu pareja deberá retroceder en lugar de avanzar tantas casillas como indique el dado.",
+                "Juega esta carta antes de realizar un duelo. Si pierdes, no tendrás que coger una carta de reto secreto.",
+                "Anula una carta de ventaja jugada por tu pareja.",
+                "Comodín de la lujuria: Obliga a tu pareja a darte placer oral durante 2 minutos.",
+                "Pausa dramática: Ordena a tu pareja que se quede completamente inmóvil durante 1 minuto mientras haces lo que quieras."
+            ],
+            challenge: [
+                "Levanta tu camiseta o baja tus pantalones para que tu pareja te toque. Después vuelve a colocarte bien la ropa. Si ya estáis desnudos, solo deja que te toque.",
+                "Tienes dos minutos para calentar a tu pareja tanto como puedas. Comprueba el resultado.",
+                "Todas las casillas de 'carta de ayuda' se convierten en cartas de 'reto secreto' hasta tu próximo turno.",
+                "Durante tres turnos deberás susurrar seductoramente en el oído de tu pareja cada vez que quieras hablar.",
+                "Deberás cerrar los ojos durante dos turnos. Tu pareja puede sabotearte o aprovechar para tocarte...",
+                "Durante dos turnos no mires ninguna parte del cuerpo de tu pareja que no sea la cara. Retrocede dos casillas si fallas.",
+                "Tira los dados en secreto y hazle a tu pareja el número de cosas correspondientes sin decirle por qué.",
+                "Toca y besa a tu pareja donde tú quieras durante 3 minutos.",
+                "Durante el próximo turno, no podrás separar los labios del cuerpo de tu pareja.",
+                "El jugador que va más atrás en el tablero se quita una prenda.",
+                "El jugador que va más atrás en el tablero coge una carta de reto secreto.",
+                "Durante el próximo turno, no podrás separar las manos del cuerpo de tu pareja.",
+                "Durante dos turnos, debes hacer tú también los retos que aparecen en las casillas de tu pareja.",
+                "Descarta todas tus cartas de ayuda. Si no tienes ninguna, coge una carta de reto secreto.",
+                "Toca y besa la parte del tronco de tu pareja que más te guste y explícale por qué.",
+                "Colócate detrás de tu pareja y susúrrale cosas calientes mientras la tocas.",
+                "Helado humano: Usa un cubito de hielo (o algo frío) y recórrelo por el cuerpo de tu pareja.",
+                "Venda sensorial: Venda los ojos a tu pareja y usa 3 texturas diferentes en sus zonas erógenas."
+            ],
+            secret: [
+                "Haz trampa sin que tu pareja se entere. Si lo consigues, pásale esta carta para que sepa que fue engañada.",
+                "Durante un turno, solo podrás mirar las partes íntimas de tu pareja descaradamente.",
+                "Empieza acariciando la pierna de tu pareja de forma disimulada y poco a poco acércate a su zona íntima.",
+                "Sin decir nada, empuja a tu pareja para tumbarla. Después bésala y tócala.",
+                "Líbrate de esta carta escondiéndola sin que te descubra. Si fallas, quítate una prenda.",
+                "Durante dos turnos, acércate tanto a tu pareja como puedas. Intenta no despegarte.",
+                "Sin decir nada, sujeta las manos de tu pareja y bésala intensamente.",
+                "Sin decir nada, quítale una prenda a tu pareja y bésala y tócala.",
+                "Sin decir nada, toma la mano de tu pareja y colócala en tu zona íntima.",
+                "Sin decir nada, quítate una prenda y tírasela a tu pareja.",
+                "Elige un número del 1 al 6 en tu mente. Cada vez que alguien obtenga esa cantidad, debes besar a tu pareja.",
+                "Durante dos turnos, trata de distraer a tu pareja con besos y tocamientos cada vez que intente tirar dados.",
+                "Durante un turno, interrumpe a tu pareja con besos cada vez que intente hablar.",
+                "Elige un número del 1 al 6. Cada vez que salga, deberás tocar la zona íntima de tu pareja.",
+                "Gime ligeramente en el oído de tu pareja cada vez que sea su turno de tirar los dados.",
+                "Quítate la ropa interior discretamente sin usar las manos o bajo la mesa."
+            ],
+            duel: [
+                { text: "Peleas de almohadas... ¿Con final feliz? (Sin perdedor real).", adv: "Tu oponente solo puede usar una mano." },
+                { text: "Juego de compartir o robar. 1 o 2 cartas. (Robar = reto secreto para el otro, Compartir = carta ayuda).", adv: "Podrás elegir después de tu oponente." },
+                { text: "Jugador 1 esconde una prenda. Jugador 2 tiene 1 min para encontrarla con ojos cerrados.", adv: "Puedes distraer al buscador (sin impedir avanzar) o decir frío/caliente." },
+                { text: "Escribe una letra en el cuerpo de tu pareja con la lengua. El otro debe adivinarla.", adv: "Puedes usar mayúsculas, minúsculas o números para confundir." },
+                { text: "Concurso de miradas. Podéis distraeros con tocamientos.", adv: "Tu oponente no podrá tocarte con las manos." },
+                { text: "Cronómetro: Quién tarda menos en quitarle una prenda al otro sin usar las manos.", adv: "Puedes elegir qué prenda debe quitarte tu oponente." },
+                { text: "Simón dice. El primero que no supere una prueba (razonable) impuesta pierde.", adv: "Por cada turno que tu pareja sea Simón, tú lo serás dos veces." },
+                { text: "Besaros intensamente sin usar las manos. El primero en usar las manos pierde.", adv: "Tu oponente perderá si te toca con cualquier parte que no sea la boca." },
+                { text: "Cronómetro: Quién tarda menos en hacer que el otro gima o tenga un espasmo.", adv: "Súmale 30 segundos al tiempo que marque tu cronómetro." },
+                { text: "Tienes 2 minutos para quitarle una prenda al oponente a la fuerza (jugando).", adv: "Tu oponente tendrá que tener los ojos cerrados." },
+                { text: "Parar el cronómetro lo más cerca de 5 seg (sin mirar).", adv: "Puedes mirar el cronómetro." },
+                { text: "Batalla de besos: 1 min. Quien logre dar más besos en cuello y pecho gana.", adv: "El oponente debe mantener las manos atrás." },
+                { text: "Seducción silenciosa: 2 min para excitar al otro sin hablar ni tocar zonas íntimas. Quien se rinda pierde.", adv: "Puedes vendarle los ojos al oponente." }
+            ]
+        };
+
+        // --- GAME ENGINE & STATE ---
+        let boardTiles = [];
+        let players = [
+            { id: 0, name: 'A', position: 0, clothes: 5, inventory: [], tokenClass: 'token-A', theme: 'cyan' },
+            { id: 1, name: 'L', position: 0, clothes: 5, inventory: [], tokenClass: 'token-L', theme: 'pink' }
+        ];
+        let currentPlayerIndex = 0;
+        let isMoving = false;
+        let timerInterval;
+        let timerSeconds = 120;
+
+        // Custom Alert Function
+        function showAlert(msg) {
+            document.getElementById('alert-text').innerText = msg;
+            document.getElementById('alert-modal').classList.remove('hidden');
+        }
+        function closeAlert() {
+            document.getElementById('alert-modal').classList.add('hidden');
+        }
+
+        // --- STREAMING_CHUNK:Generating the Board... ---
+        function generateBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            boardTiles = [];
+
+            // Start tile
+            boardTiles.push({ type: 'start', text: 'INICIO', color: '#fff' });
+
+            // Generate path randomly from templates
+            for (let i = 1; i < BOARD_SIZE - 1; i++) {
+                // Ensure specific tiles are scattered, heavily weight 'action'
+                let template;
+                const rand = Math.random();
+                if (rand < 0.1) template = TILE_TYPES.find(t => t.type === 'help');
+                else if (rand < 0.2) template = TILE_TYPES.find(t => t.type === 'clothes');
+                else if (rand < 0.3) template = TILE_TYPES.find(t => t.type === 'duel');
+                else if (rand < 0.4) template = TILE_TYPES.find(t => t.type === 'challenge');
+                else if (rand < 0.5) template = TILE_TYPES.find(t => t.type === 'secret');
+                else template = TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)]; // Any tile
+                
+                boardTiles.push(template);
+            }
+
+            // End tile
+            boardTiles.push({ type: 'clothes', text: 'FIN: PIERDES TODA LA ROPA', color: '#ff0000', action: 'naked' });
+
+            // Render tiles in DOM
+            boardTiles.forEach((tile, index) => {
+                const el = document.createElement('div');
+                el.className = `tile tile-${tile.type}`;
+                el.style.borderColor = tile.color;
+                el.innerHTML = `<span>${index === 0 ? 'START' : tile.text}</span> <span class="absolute top-1 left-1 text-[10px] opacity-30">${index}</span>`;
+                el.id = `tile-${index}`;
+                boardEl.appendChild(el);
+            });
+
+            // Create Tokens
+            players.forEach(p => {
+                const token = document.createElement('div');
+                token.id = `token-p${p.id}`;
+                token.className = `token ${p.tokenClass}`;
+                token.innerText = p.name;
+                boardEl.appendChild(token);
+            });
+
+            setTimeout(() => { updateTokenPositions(); }, 500);
+        }
+
+        function updateTokenPositions() {
+            players.forEach(p => {
+                const tile = document.getElementById(`tile-${p.position}`);
+                if (tile) {
+                    const rect = tile.getBoundingClientRect();
+                    const boardRect = document.getElementById('board').getBoundingClientRect();
+                    const token = document.getElementById(`token-p${p.id}`);
+                    
+                    // Add slight offset so they don't completely overlap
+                    const offsetX = p.id === 0 ? -10 : 10;
+                    const offsetY = p.id === 0 ? -10 : 10;
+
+                    // Calculate relative position within the grid based on CSS grid layout
+                    // To do this robustly without relying purely on rects (which might be animating),
+                    // we append the token to the tile, but keep it visually distinct.
+                    // Actually, absolute positioning on the board relative works best.
+                    
+                    const left = tile.offsetLeft;
+                    const top = tile.offsetTop;
+
+                    token.style.left = `${left + tile.offsetWidth/2 - token.offsetWidth/2 + offsetX}px`;
+                    token.style.top = `${top + tile.offsetHeight/2 - token.offsetHeight/2 + offsetY}px`;
+                }
+            });
+        }
+
+        window.addEventListener('resize', updateTokenPositions);
+
+        // --- STREAMING_CHUNK:Dice and Turn Logic... ---
+        function initiateDiceRoll() {
+            if (isMoving) return;
+            
+            const btn = document.getElementById('btn-roll');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const modal = document.getElementById('dice-modal');
+            const cube = document.getElementById('cube');
+            const resultText = document.getElementById('dice-result-text');
+            
+            modal.classList.remove('hidden');
+            resultText.classList.add('opacity-0');
+            cube.classList.add('rolling');
+
+            // Simulate rolling time
+            setTimeout(() => {
+                cube.classList.remove('rolling');
+                const result = Math.floor(Math.random() * 6) + 1;
+                
+                // Show face logic (CSS transforms)
+                let x = 0, y = 0;
+                switch(result) {
+                    case 1: x=0; y=0; break;
+                    case 2: x=0; y=-90; break;
+                    case 3: x=0; y=-180; break;
+                    case 4: x=0; y=90; break;
+                    case 5: x=-90; y=0; break;
+                    case 6: x=90; y=0; break;
+                }
+                cube.style.transform = `translateZ(-50px) rotateX(${x}deg) rotateY(${y}deg)`;
+                
+                resultText.innerText = `Avanzas ${result} casillas`;
+                resultText.classList.remove('opacity-0');
+
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    cube.style.transform = ''; // reset for next time
+                    movePlayer(currentPlayerIndex, result);
+                }, 2000);
+
+            }, 1500);
+        }
+
+        function movePlayer(playerIndex, steps) {
+            isMoving = true;
+            const p = players[playerIndex];
+            const targetPos = Math.min(p.position + steps, BOARD_SIZE - 1);
+            
+            // Step by step animation
+            let currentStep = p.position;
+            const interval = setInterval(() => {
+                if (currentStep < targetPos) {
+                    currentStep++;
+                    p.position = currentStep;
+                    updateTokenPositions();
+                } else {
+                    clearInterval(interval);
+                    handleTileLanded(p, targetPos);
+                }
+            }, 300); // Speed of moving tile to tile
+        }
+
+        // --- STREAMING_CHUNK:Tile Action Handling... ---
+        function handleTileLanded(player, position) {
+            const tile = boardTiles[position];
+            
+            if (tile.action) {
+                executeAction(player, tile.action, tile.text);
+            } else if (tile.type === 'action') {
+                // Generic text action on board
+                showCardModal('Acción Requerida', tile.text, 'action', 'fa-fire');
+                endTurnLogic();
+            } else {
+                endTurnLogic();
+            }
+        }
+
+        function executeAction(player, action, text) {
+            switch(action) {
+                case 'drawHelp':
+                    const helpCard = drawRandomCard(DECKS.help);
+                    player.inventory.push({ type: 'help', text: helpCard });
+                    showCardModal('Carta de Ayuda Obtenida', helpCard, 'help', 'fa-hand-holding-heart');
+                    updateInventoryUI();
+                    endTurnLogic();
+                    break;
+                case 'drawChallenge':
+                    showCardModal('Reto', drawRandomCard(DECKS.challenge), 'challenge', 'fa-bolt');
+                    endTurnLogic();
+                    break;
+                case 'drawSecret':
+                    const secretCard = drawRandomCard(DECKS.secret);
+                    player.inventory.push({ type: 'secret', text: secretCard });
+                    showCardModal('Reto Secreto', secretCard + "<br><br><small><i>Solo tú debes leer esto. Cumple el reto en secreto.</i></small>", 'secret', 'fa-user-secret');
+                    updateInventoryUI();
+                    endTurnLogic();
+                    break;
+                case 'drawDuel':
+                    const duelCard = drawRandomCard(DECKS.duel);
+                    showCardModal('¡DUELO!', duelCard.text, 'duel', 'fa-khanda', duelCard.adv);
+                    endTurnLogic();
+                    break;
+                case 'loseClothes':
+                    adjustClothes(player.id, -1);
+                    showAlert(`${player.name}, quítate una prenda.`);
+                    checkWinCondition();
+                    endTurnLogic();
+                    break;
+                case 'bothLoseClothes':
+                    adjustClothes(0, -1);
+                    adjustClothes(1, -1);
+                    showAlert(`¡Ambos os quitáis una prenda!`);
+                    checkWinCondition();
+                    endTurnLogic();
+                    break;
+                case 'stealClothes':
+                    const otherId = player.id === 0 ? 1 : 0;
+                    adjustClothes(otherId, -1);
+                    showAlert(`${player.name}, quítale una prenda a ${players[otherId].name}.`);
+                    checkWinCondition();
+                    endTurnLogic();
+                    break;
+                case 'naked':
+                    adjustClothes(player.id, -99); // Force 0
+                    showAlert(`¡OH NO! ${player.name} debe desnudarse completamente.`);
+                    checkWinCondition();
+                    break;
+                case 'moveBack2':
+                    showAlert(`Retrocedes 2 casillas.`);
+                    setTimeout(() => movePlayer(player.id, -2), 1500);
+                    // endTurnLogic handled after movement
+                    break;
+                case 'goStart':
+                    showAlert(`¡Vuelves al inicio!`);
+                    player.position = 0;
+                    updateTokenPositions();
+                    endTurnLogic();
+                    break;
+                case 'miniGameDice':
+                    showCardModal('Dados del Placer', 'Tira de nuevo. Si sacas par, tocas. Si sacas impar, besas. Tira otra vez para saber cuántas prendas debes quitarle (o ponértelas si quieres). <br><br><i>(Interpretación libre durante 2 minutos)</i>', 'minigame', 'fa-dice-d20');
+                    endTurnLogic();
+                    break;
+                default:
+                    endTurnLogic();
+            }
+        }
+
+        function endTurnLogic() {
+            // Wait for modals to be closed before allowing next turn
+            // The modal close button will trigger nextTurn()
+            if (document.getElementById('card-modal').classList.contains('hidden') && 
+                document.getElementById('alert-modal').classList.contains('hidden')) {
+                nextTurn();
+            } else {
+                // A modal is open, intercept its close event conceptually
+                // Handled in closeCardModal and closeAlert
+            }
+        }
+
+        function nextTurn() {
+            currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+            const p = players[currentPlayerIndex];
+            
+            // Update UI
+            document.getElementById('turn-indicator').innerText = `Turno de ${p.name}`;
+            document.getElementById('turn-indicator').className = `text-sm font-bold uppercase tracking-widest mb-2 text-${p.theme}-400`;
+            
+            document.getElementById('player1-stats').classList.toggle('opacity-50', currentPlayerIndex !== 0);
+            document.getElementById('player1-stats').classList.toggle('scale-110', currentPlayerIndex === 0);
+            document.getElementById('player1-stats').classList.toggle('border-b-2', currentPlayerIndex === 0);
+
+            document.getElementById('player2-stats').classList.toggle('opacity-50', currentPlayerIndex !== 1);
+            document.getElementById('player2-stats').classList.toggle('scale-110', currentPlayerIndex === 1);
+            document.getElementById('player2-stats').classList.toggle('border-b-2', currentPlayerIndex === 1);
+
+            const btn = document.getElementById('btn-roll');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            isMoving = false;
+        }
+
+        // --- STREAMING_CHUNK:Cards and Modals Management... ---
+        function drawRandomCard(deck) {
+            const index = Math.floor(Math.random() * deck.length);
+            return deck[index]; // Note: in a real game, remove card from deck to avoid repeats until empty
+        }
+
+        function showCardModal(title, text, type, iconClass, advantage = null) {
+            document.getElementById('card-title').innerText = title;
+            document.getElementById('card-desc').innerHTML = text;
+            document.getElementById('card-icon').className = `fas ${iconClass}`;
+            
+            const content = document.getElementById('card-content');
+            const advEl = document.getElementById('duel-advantage');
+            
+            // Reset styles
+            content.style.borderColor = '#333';
+            document.getElementById('card-icon').style.color = '#fff';
+            advEl.classList.add('hidden');
+
+            if (type === 'help') { content.style.borderColor = '#00ffcc'; document.getElementById('card-icon').style.color = '#00ffcc'; }
+            if (type === 'challenge') { content.style.borderColor = '#ffaa00'; document.getElementById('card-icon').style.color = '#ffaa00'; }
+            if (type === 'secret') { content.style.borderColor = '#9d00ff'; document.getElementById('card-icon').style.color = '#9d00ff'; }
+            if (type === 'duel') { 
+                content.style.borderColor = '#ff00a0'; 
+                document.getElementById('card-icon').style.color = '#ff00a0'; 
+                if(advantage) {
+                    advEl.classList.remove('hidden');
+                    document.getElementById('duel-adv-text').innerText = advantage;
+                }
+            }
+            if (type === 'action') { content.style.borderColor = '#ff003c'; document.getElementById('card-icon').style.color = '#ff003c'; }
+
+            document.getElementById('card-modal').classList.remove('hidden');
+            
+            // Reset animation
+            content.style.animation = 'none';
+            content.offsetHeight; /* trigger reflow */
+            content.style.animation = null; 
+        }
+
+        function closeCardModal() {
+            document.getElementById('card-modal').classList.add('hidden');
+            if (isMoving) nextTurn(); // If called from within a turn flow
+        }
+
+        // Override closeAlert for flow control
+        const originalCloseAlert = closeAlert;
+        closeAlert = function() {
+            originalCloseAlert();
+            if (isMoving) nextTurn();
+        }
+
+
+        // --- STREAMING_CHUNK:Inventory and Player Stats... ---
+        function adjustClothes(playerIndex, amount) {
+            players[playerIndex].clothes = Math.max(0, players[playerIndex].clothes + amount);
+            document.getElementById(`p${playerIndex+1}-clothes`).innerText = players[playerIndex].clothes;
+        }
+
+        function checkWinCondition() {
+            if (players[0].clothes === 0) {
+                showAlert("¡JUGADOR A SE HA DESNUDADO PRIMERO! Ha perdido el juego. El ganador decide el castigo final.");
+            } else if (players[1].clothes === 0) {
+                showAlert("¡JUGADOR L SE HA DESNUDADO PRIMERO! Ha perdido el juego. El ganador decide el castigo final.");
+            }
+        }
+
+        function toggleInventory() {
+            const panel = document.getElementById('inventory-panel');
+            panel.classList.toggle('open');
+            updateInventoryUI();
+        }
+
+        function updateInventoryUI() {
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = '';
+            
+            const p = players[currentPlayerIndex];
+            
+            if (p.inventory.length === 0) {
+                list.innerHTML = `<p class="text-gray-500 text-center italic mt-10">No tienes cartas en tu inventario.</p>`;
+                return;
+            }
+
+            p.inventory.forEach((cardObj, index) => {
+                // Compatibilidad por si hay cartas guardadas como texto
+                const type = typeof cardObj === 'string' ? 'help' : cardObj.type;
+                const text = typeof cardObj === 'string' ? cardObj : cardObj.text;
+                
+                const color = type === 'secret' ? '#9d00ff' : '#00ffcc';
+                const label = type === 'secret' ? 'RETO SECRETO' : 'CARTA DE AYUDA';
+                const icon = type === 'secret' ? 'fa-check' : 'fa-play';
+                const titleAttr = type === 'secret' ? 'Marcar como cumplido' : 'Usar Carta';
+
+                const el = document.createElement('div');
+                el.className = 'bg-black/50 border p-3 rounded-lg text-sm mb-2 transition cursor-pointer relative group';
+                el.style.borderColor = `${color}4D`; // 4D es un 30% de opacidad en Hex
+                el.onmouseenter = () => el.style.borderColor = color;
+                el.onmouseleave = () => el.style.borderColor = `${color}4D`;
+                
+                el.innerHTML = `
+                    <p class="text-xs font-bold mb-1" style="color: ${color}">${label}</p>
+                    <p class="pr-6 text-gray-300">${text}</p>
+                    <button onclick="useCard(${index})" class="absolute top-2 right-2 text-gray-400 opacity-0 group-hover:opacity-100 transition" onmouseover="this.style.color='${color}'" onmouseout="this.style.color=''" title="${titleAttr}">
+                        <i class="fas ${icon}"></i>
+                    </button>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        function useCard(index) {
+            const p = players[currentPlayerIndex];
+            const cardObj = p.inventory[index];
+            const type = typeof cardObj === 'string' ? 'help' : cardObj.type;
+            const text = typeof cardObj === 'string' ? cardObj : cardObj.text;
+            
+            p.inventory.splice(index, 1); // Remove it
+            toggleInventory();
+            
+            if (type === 'secret') {
+                showAlert(`Has cumplido el reto secreto:\n\n"${text}"`);
+            } else {
+                showAlert(`Has usado:\n\n"${text}"`);
+            }
+        }
+
+        // --- STREAMING_CHUNK:Timer Logic... ---
+        let timerSetupTime = 120; // Internal tracker for modal setup
+
+        function toggleTimerModal() {
+            const modal = document.getElementById('timer-modal');
+            modal.classList.toggle('hidden');
+            timerSetupTime = timerSeconds > 0 ? timerSeconds : 120; // Default or current
+            updateTimerSetupUI();
+        }
+
+        function adjustTimer(amount) {
+            timerSetupTime = Math.max(10, timerSetupTime + amount);
+            updateTimerSetupUI();
+        }
+
+        function updateTimerSetupUI() {
+            const min = Math.floor(timerSetupTime / 60).toString().padStart(2, '0');
+            const sec = (timerSetupTime % 60).toString().padStart(2, '0');
+            document.getElementById('timer-setup-min').innerText = min;
+            document.getElementById('timer-setup-sec').innerText = sec;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerSeconds = timerSetupTime;
+            updateGlobalTimerUI();
+            document.getElementById('timer-modal').classList.add('hidden');
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateGlobalTimerUI();
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    showAlert("¡EL TIEMPO HA TERMINADO!");
+                    const icon = document.querySelector('.fa-stopwatch');
+                    icon.classList.remove('animate-pulse', 'text-neon-pink');
+                    icon.classList.add('text-gray-500');
+                }
+            }, 1000);
+
+            const icon = document.querySelector('.fa-stopwatch');
+            icon.classList.add('animate-pulse', 'text-neon-pink');
+            icon.classList.remove('text-gray-500');
+        }
+
+        function updateGlobalTimerUI() {
+            const min = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const sec = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('global-timer').innerText = `${min}:${sec}`;
+        }
+
+        function showRules() {
+            const rules = `
+                <b>Reglas de Lujuria y Azar:</b><br><br>
+                1. El objetivo es que tu pareja pierda su ropa antes que tú.<br>
+                2. Empezáis con 5 prendas. Al llegar a 0, pierdes el juego.<br>
+                3. Tira los dados y avanza. Cumple siempre lo que diga la casilla o carta.<br>
+                4. Las cartas de "Reto Secreto" no se leen en voz alta. Cúmplelas discretamente.<br>
+                5. Los "Duelos" otorgan cartas de ayuda al ganador y retos secretos al perdedor.<br>
+                6. Si el tiempo no se especifica en un reto, se asumen 2 minutos. Usa el reloj de la barra superior.
+            `;
+            showAlert(rules);
+            document.getElementById('alert-text').innerHTML = rules; // Override text to allow HTML
+        }
+
+        // Initialize
+        window.onload = () => {
+            generateBoard();
+        };
+
+    </script>
+</body>
+</html>

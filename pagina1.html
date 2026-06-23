@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasión Oculta - Juego de Mesa Sensual 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d040f;
+            --board-bg: #1c0a22;
+            --accent-red: #ff2a5f;
+            --accent-gold: #ffd700;
+            --accent-purple: #9d4edd;
+            --neon-blue: #00f5d4;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 50%, #250731 0%, #0d040f 100%);
+            color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, .font-title {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Contenedor del tablero con perspectiva 3D */
+        .board-container {
+            perspective: 1500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1.5rem auto;
+            width: 520px;
+            height: 520px;
+            position: relative;
+        }
+
+        /* El tablero rotado en 3D */
+        .board {
+            width: 500px;
+            height: 500px;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 6px;
+            transform: rotateX(55deg) rotateZ(-45deg);
+            transform-style: preserve-3d;
+            box-shadow: -25px 25px 40px rgba(0, 0, 0, 0.9), 0 0 50px rgba(255, 42, 95, 0.25);
+            background: var(--board-bg);
+            padding: 12px;
+            border-radius: 20px;
+            border: 3px solid #3c1642;
+            position: relative;
+        }
+
+        /* Estilo de cada casilla */
+        .tile {
+            background: linear-gradient(135deg, #23122b, #130616);
+            border: 1px solid #4a2559;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 0.6rem;
+            padding: 4px;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.6), -2px 2px 4px rgba(0,0,0,0.4);
+            position: relative;
+            transition: all 0.3s ease;
+            color: #d8b4e2;
+            cursor: pointer;
+            user-select: none;
+            transform-style: preserve-3d;
+        }
+
+        .tile:hover {
+            background: linear-gradient(135deg, #441e54, #23122b);
+            border-color: var(--accent-red);
+            box-shadow: 0 0 15px rgba(255, 42, 95, 0.6), inset 0 0 10px rgba(255, 42, 95, 0.3);
+        }
+
+        .tile.start-tile { border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+        .tile.danger-tile { border-color: var(--accent-red); color: #ff8fa3; }
+        .tile.card-tile { border-color: var(--accent-purple); color: #c8b6ff; }
+
+        /* Fichas de jugadores perfectamente integradas en el espacio 3D del tablero */
+        .token {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: bold;
+            transform-style: preserve-3d;
+            pointer-events: none;
+            z-index: 50;
+            /* Transición fluida para que la ficha 'deslice' de casilla a casilla */
+            transition: left 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s ease;
+        }
+
+        /* 
+           Alineación 3D precisa:
+           Para compensar la inclinación de la tabla (rotateX(55deg) rotateZ(-45deg))
+           rotamos en sentido inverso (rotateZ(45deg) rotateX(-55deg)) para que queden totalmente verticales ante la pantalla.
+           Elevamos en el eje Z (translateZ(20px)) para que no queden sumergidas bajo la textura del tablero.
+        */
+        .token-A {
+            color: var(--neon-blue);
+            text-shadow: 
+                0 1px 0 #008f7a, 
+                0 2px 0 #006b5b, 
+                0 3px 0 #004d41, 
+                0 5px 8px rgba(0, 0, 0, 0.9), 
+                0 0 25px rgba(0, 245, 212, 0.8);
+            /* Desviado al cuadrante superior izquierdo de la casilla */
+            transform: translate(-75%, -75%) rotateZ(45deg) rotateX(-55deg) translateZ(18px);
+        }
+
+        .token-L {
+            color: var(--accent-red);
+            text-shadow: 
+                0 1px 0 #b3002f, 
+                0 2px 0 #800022, 
+                0 3px 0 #4d0014, 
+                0 5px 8px rgba(0, 0, 0, 0.9), 
+                0 0 25px rgba(255, 42, 95, 0.8);
+            /* Desviado al cuadrante inferior derecho de la casilla */
+            transform: translate(-25%, -25%) rotateZ(45deg) rotateX(-55deg) translateZ(18px);
+        }
+
+        /* Escalado dinámico para que el tablero 3D se visualice perfectamente en móviles */
+        @media (max-width: 640px) {
+            .board-container {
+                transform: scale(0.72);
+                margin: -70px auto;
+                height: 380px;
+                width: 380px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .board-container {
+                transform: scale(0.58);
+                margin: -110px auto;
+                height: 310px;
+                width: 310px;
+            }
+        }
+
+        .modal-overlay {
+            background-color: rgba(6, 2, 8, 0.92);
+            backdrop-filter: blur(8px);
+        }
+
+        .glass-panel {
+            background: rgba(28, 10, 34, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+        }
+
+        /* Estilo visual para las cartas físicas */
+        .card-visual {
+            width: 240px;
+            height: 340px;
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            margin: 0 auto;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .card-visual::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent 35%, rgba(255,255,255,0.15) 50%, transparent 65%);
+            background-size: 250% 250%;
+            animation: shine 3.5s infinite linear;
+        }
+
+        @keyframes shine {
+            0% { background-position: 250% 0; }
+            100% { background-position: -250% 0; }
+        }
+
+        .card-ayuda { background: linear-gradient(135deg, #102a3a, #0779e4); color: #fff; border-color: #00f5d4; }
+        .card-reto { background: linear-gradient(135deg, #6c114d, #e94560); color: #fff; border-color: var(--accent-red); }
+        .card-secreto { background: linear-gradient(135deg, #240b36, #c31432); color: #fff; border-color: var(--accent-gold); }
+        .card-duelo { background: linear-gradient(135deg, #4b1212, #8d1b1b); color: #fff; border-color: #ff5e5e; }
+
+        .btn-glowing {
+            background: linear-gradient(45deg, var(--accent-red), #ff5e7e);
+            box-shadow: 0 4px 20px rgba(255, 42, 95, 0.5);
+            transition: all 0.3s ease;
+        }
+        .btn-glowing:hover {
+            box-shadow: 0 6px 25px rgba(255, 42, 95, 0.8);
+            transform: translateY(-2px);
+        }
+        .btn-glowing:active { transform: translateY(1px); }
+
+        /* Dados animados */
+        .dice {
+            width: 65px;
+            height: 65px;
+            background-color: #fff;
+            border-radius: 14px;
+            box-shadow: inset 0 0 18px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            color: #1a0624;
+            font-weight: bold;
+            margin: 0 auto;
+            border: 2px solid #e1bfe7;
+        }
+
+        @keyframes rollDice {
+            0% { transform: rotate(0deg) scale(1); }
+            20% { transform: rotate(120deg) scale(1.2); }
+            40% { transform: rotate(240deg) scale(0.85); }
+            60% { transform: rotate(360deg) scale(1.15); }
+            80% { transform: rotate(480deg) scale(0.95); }
+            100% { transform: rotate(720deg) scale(1); }
+        }
+
+        .rolling { animation: rollDice 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* Cronómetro */
+        .timer-ring {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 5px solid #281433;
+            border-top-color: var(--accent-gold);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            font-family: 'Cinzel', serif;
+            margin: 0 auto;
+            position: relative;
+            background: rgba(13, 4, 15, 0.6);
+        }
+        .timer-ring.active {
+            animation: pulseTimer 1.2s infinite alternate;
+        }
+        @keyframes pulseTimer {
+            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); border-color: #281433; }
+            100% { box-shadow: 0 0 35px var(--accent-gold), inset 0 0 20px rgba(255, 215, 0, 0.5); border-color: var(--accent-gold); }
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+
+    <!-- Cabecera -->
+    <header class="w-full p-4 flex justify-between items-center glass-panel z-20 relative border-b border-purple-900/40">
+        <div class="text-center w-full absolute left-0 right-0 pointer-events-none">
+            <h1 class="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 font-title drop-shadow-lg tracking-widest">Pasión Oculta</h1>
+            <p id="turn-indicator" class="text-xs md:text-sm text-gray-300 mt-1">Turno de: <span class="font-bold text-[var(--neon-blue)]">Jugador A</span></p>
+        </div>
+        
+        <div class="flex space-x-5 z-30 relative w-full justify-between px-3 md:px-10">
+            <button onclick="openTimerModal()" class="text-gray-300 hover:text-white hover:scale-110 transition duration-300" title="Cronómetro"><i class="fas fa-stopwatch text-2xl text-pink-500"></i></button>
+            <button onclick="showRules()" class="text-gray-300 hover:text-white hover:scale-110 transition duration-300" title="Reglas"><i class="fas fa-book-open text-2xl text-yellow-500"></i></button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal de la App -->
+    <div class="flex-grow w-full max-w-7xl flex flex-col lg:flex-row relative justify-center px-4 py-2">
+        
+        <!-- Panel Jugador A -->
+        <div class="w-full lg:w-1/4 p-3 flex flex-col z-10 order-2 lg:order-1 mt-6 lg:mt-0">
+            <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col border-t-4 border-[var(--neon-blue)] bg-opacity-90">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-bold text-[var(--neon-blue)] font-title"><i class="fas fa-venus-mars mr-2"></i>Jugador A</h2>
+                    <span id="player-status-A" class="text-xs bg-teal-950 text-teal-300 px-2 py-0.5 rounded border border-teal-800">Activo</span>
+                </div>
+                
+                <div class="mb-5 bg-black/40 p-3 rounded-xl border border-purple-900/20">
+                    <p class="text-xs text-gray-400 mb-2 uppercase tracking-wider">Prendas de vestir encima:</p>
+                    <div class="flex gap-2 flex-wrap min-h-[30px]" id="clothes-A">
+                        <!-- Iconos de ropa generados por JS -->
+                    </div>
+                </div>
+
+                <div class="flex-grow flex flex-col">
+                    <p class="text-xs text-gray-400 mb-2 uppercase tracking-wider border-b border-purple-900/50 pb-1">Inventario de Cartas</p>
+                    <div id="inventory-A" class="space-y-2 overflow-y-auto max-h-56 no-scrollbar flex-grow">
+                        <p class="text-xs text-gray-500 italic">Sin cartas guardadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tablero Central -->
+        <div class="w-full lg:w-1/2 relative flex flex-col justify-center items-center order-1 lg:order-2" style="min-height: 480px;">
+            <div class="board-container">
+                <div class="board" id="game-board">
+                    <!-- Las casillas se generan por JS -->
+                    <!-- Las fichas se inyectan aquí dentro para heredar el espacio 3D exacto -->
+                </div>
+            </div>
+
+            <!-- Controles Centrales Flotantes -->
+            <div class="absolute bottom-[-20px] lg:bottom-4 flex flex-col items-center glass-panel px-6 py-4 rounded-2xl border border-pink-500/30 shadow-2xl z-20 w-72">
+                <div id="dice-display" class="dice mb-3">🎲</div>
+                <button id="btn-roll" onclick="rollDiceAndMove()" class="btn-glowing w-full py-3 rounded-xl font-bold text-white uppercase tracking-wider text-sm transition">
+                    Lanzar Dado
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel Jugador L -->
+        <div class="w-full lg:w-1/4 p-3 flex flex-col z-10 order-3 mt-12 lg:mt-0">
+            <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col border-t-4 border-[var(--accent-red)] bg-opacity-90">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-bold text-[var(--accent-red)] font-title"><i class="fas fa-venus-mars mr-2"></i>Jugador L</h2>
+                    <span id="player-status-L" class="text-xs bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">Espera</span>
+                </div>
+                
+                <div class="mb-5 bg-black/40 p-3 rounded-xl border border-purple-900/20">
+                    <p class="text-xs text-gray-400 mb-2 uppercase tracking-wider">Prendas de vestir encima:</p>
+                    <div class="flex gap-2 flex-wrap min-h-[30px]" id="clothes-L">
+                        <!-- Iconos de ropa generados por JS -->
+                    </div>
+                </div>
+
+                <div class="flex-grow flex flex-col">
+                    <p class="text-xs text-gray-400 mb-2 uppercase tracking-wider border-b border-purple-900/50 pb-1">Inventario de Cartas</p>
+                    <div id="inventory-L" class="space-y-2 overflow-y-auto max-h-56 no-scrollbar flex-grow">
+                        <p class="text-xs text-gray-500 italic">Sin cartas guardadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Modal de Acción / Mensajes de Casilla (Sustituye a alert()) -->
+    <div id="action-modal" class="fixed inset-0 modal-overlay z-50 hidden flex justify-center items-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel p-6 md:p-8 rounded-2xl max-w-md w-full text-center border border-pink-500/40 transform scale-95 transition-transform duration-300" id="action-modal-content">
+            <div class="w-16 h-16 bg-pink-500/10 border border-pink-500 rounded-full flex justify-center items-center mx-auto mb-4">
+                <i id="action-modal-icon" class="fas fa-kiss-wink-heart text-2xl text-pink-400"></i>
+            </div>
+            <h2 id="action-title" class="text-2xl font-bold font-title text-pink-400 mb-3">Título</h2>
+            <p id="action-desc" class="text-gray-200 mb-6 leading-relaxed">Descripción detallada.</p>
+            <div id="action-timer-trigger" class="mb-4 hidden">
+                <button onclick="startActionTimer(120)" class="bg-purple-950/80 hover:bg-purple-900 text-purple-200 border border-purple-700/50 px-4 py-2 rounded-xl text-xs flex items-center justify-center mx-auto gap-2 transition">
+                    <i class="fas fa-stopwatch text-yellow-400"></i> Poner Cronómetro (2 Minutos)
+                </button>
+            </div>
+            <button id="btn-action-close" class="btn-glowing px-8 py-2.5 rounded-xl font-bold w-full text-sm">Entendido / Continuar</button>
+        </div>
+    </div>
+
+    <!-- Modal para Mostrar/Robar Cartas -->
+    <div id="card-modal" class="fixed inset-0 modal-overlay z-50 hidden flex justify-center items-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="flex flex-col items-center transform scale-95 transition-transform duration-300 w-full max-w-sm" id="card-modal-content">
+            <div id="card-visual" class="card-visual mb-6 w-full">
+                <span id="card-type-label" class="absolute top-5 left-0 w-full text-xs font-bold uppercase tracking-widest opacity-80">Tipo</span>
+                <i id="card-icon" class="fas fa-star text-5xl mb-5 opacity-80"></i>
+                <p id="card-text" class="text-sm md:text-base font-medium z-10 px-2 leading-relaxed">Instrucciones de la carta</p>
+            </div>
+            <div class="flex gap-4 w-full">
+                <button id="btn-use-card" onclick="useCardImmediate()" class="btn-glowing flex-1 py-3 rounded-xl font-bold text-sm">Usar Ahora</button>
+                <button id="btn-save-card" onclick="saveCardToInventory()" class="bg-gray-800 hover:bg-gray-700 border border-gray-600 flex-1 py-3 rounded-xl font-bold text-sm text-gray-200 transition">Guardar Carta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal del Minijuego de Dados -->
+    <div id="minigame-modal" class="fixed inset-0 modal-overlay z-50 hidden flex justify-center items-center p-4">
+        <div class="glass-panel p-6 md:p-8 rounded-2xl max-w-md w-full text-center border border-purple-500/40">
+            <h2 class="text-2xl font-bold font-title text-purple-400 mb-2">Minijuego de Dados</h2>
+            <p class="text-gray-300 mb-6 text-xs md:text-sm">Lanza los dados calientes para ver qué parte y qué acción debes realizar.</p>
+            
+            <div class="flex justify-center gap-6 mb-6">
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-400 mb-2">Acción</span>
+                    <div id="dice-action" class="dice bg-pink-100 text-pink-600">?</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-400 mb-2">Zona Corporal</span>
+                    <div id="dice-body" class="dice bg-purple-100 text-purple-600">?</div>
+                </div>
+            </div>
+
+            <p id="minigame-result" class="text-lg font-bold text-white h-16 flex items-center justify-center italic px-3"></p>
+            
+            <button id="btn-roll-minigame" onclick="rollMinigame()" class="btn-glowing px-6 py-3 rounded-xl font-bold w-full text-sm">Lanzar Dados de la Pasión</button>
+            <button id="btn-close-minigame" onclick="closeMinigameModal()" class="bg-gray-800 hover:bg-gray-700 px-6 py-3 rounded-xl font-bold w-full text-sm hidden transition">Terminado</button>
+        </div>
+    </div>
+
+    <!-- Modal del Cronómetro -->
+    <div id="timer-modal" class="fixed inset-0 modal-overlay z-50 hidden flex justify-center items-center p-4">
+        <div class="glass-panel p-6 md:p-8 rounded-2xl text-center max-w-sm w-full border border-yellow-500/30">
+            <h2 class="text-xl font-title text-yellow-400 mb-4">Cronómetro de Placer</h2>
+            <div id="timer-display" class="timer-ring text-white mb-6">02:00</div>
+            
+            <div class="flex gap-2 justify-center mb-5">
+                <button onclick="setTimer(60)" class="bg-purple-950/60 hover:bg-purple-900 px-3 py-1.5 rounded-lg text-xs border border-purple-800">1 Min</button>
+                <button onclick="setTimer(120)" class="bg-purple-950/60 hover:bg-purple-900 px-3 py-1.5 rounded-lg text-xs border border-yellow-500 text-yellow-400 font-semibold">2 Min</button>
+                <button onclick="setTimer(180)" class="bg-purple-950/60 hover:bg-purple-900 px-3 py-1.5 rounded-lg text-xs border border-purple-800">3 Min</button>
+            </div>
+            
+            <div class="flex justify-center gap-6">
+                <button id="btn-timer-start" onclick="startTimer()" class="text-emerald-400 hover:text-emerald-300 text-4xl hover:scale-110 transition"><i class="fas fa-play-circle"></i></button>
+                <button onclick="stopTimer()" class="text-rose-400 hover:text-rose-300 text-4xl hover:scale-110 transition"><i class="fas fa-stop-circle"></i></button>
+                <button onclick="closeTimerModal()" class="text-gray-400 hover:text-white text-4xl hover:scale-110 transition"><i class="fas fa-times-circle"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS DEL JUEGO (CARTAS Y TABLERO) ---
+
+        const BOARD_SIZE = 36; // Rejilla de 6x6
+        
+        // Estructura de las Casillas
+        const TILE_TYPES = [
+            { id: 'inicio', name: 'Inicio', color: 'start-tile', icon: 'fa-home', action: 'START' },
+            { id: 'beso_frances', name: 'Beso Francés', color: 'danger-tile', icon: 'fa-kiss-wink-heart', action: 'ACTION', desc: 'Dale a tu pareja un intenso beso francés (con lengua) durante al menos 30 segundos.' },
+            { id: 'muestra_parte', name: 'Muestra Algo', color: '', icon: 'fa-eye', action: 'ACTION', desc: 'Muestra una parte de tu cuerpo que normalmente esté oculta por la ropa durante 1 minuto completo.' },
+            { id: 'carta_ayuda', name: 'Carta Ayuda', color: 'card-tile', icon: 'fa-gift', action: 'DRAW_HELP' },
+            { id: 'quita_prenda', name: 'Quítate Prenda', color: 'danger-tile', icon: 'fa-tshirt', action: 'LOSE_CLOTHING', amount: 1, target: 'self' },
+            { id: 'beso_arriba_abajo', name: 'Beso Total', color: '', icon: 'fa-sort-amount-down-alt', action: 'ACTION', desc: 'Besa lentamente a tu pareja desde el cuello bajando con delicadeza hasta el ombligo.' },
+            { id: 'duelo', name: '¡DUELO!', color: 'danger-tile', icon: 'fa-swords', iconClass: 'fa-solid fa-handshake', action: 'DRAW_DUEL' },
+            { id: 'toca_debajo', name: 'Tocado Oculto', color: '', icon: 'fa-hand-holding-heart', action: 'ACTION', desc: 'Desliza las manos por debajo de la ropa de tu pareja y acaríciala sensualmente durante 2 minutos.' },
+            { id: 'minijuego', name: 'Tirar Dados', color: 'card-tile', icon: 'fa-dice-five', action: 'MINIGAME' },
+            { id: 'reto', name: 'Reto Físico', color: 'card-tile', icon: 'fa-fire-alt', action: 'DRAW_CHALLENGE' },
+            { id: 'reto_secreto', name: 'Reto Secreto', color: 'card-tile', icon: 'fa-user-secret', action: 'DRAW_SECRET' },
+            { id: 'retrocede_2', name: 'Retrocede 2', color: '', icon: 'fa-undo-alt', action: 'MOVE', amount: -2 },
+            { id: 'retrocede_3', name: 'Retrocede 3', color: '', icon: 'fa-history', action: 'MOVE', amount: -3 },
+            { id: 'ambos_prenda', name: 'Ambos Prenda', color: 'danger-tile', icon: 'fa-heart-broken', action: 'LOSE_CLOTHING', amount: 1, target: 'both' },
+            { id: 'avanza_2', name: 'Avanza 2', color: '', icon: 'fa-angle-double-right', action: 'MOVE', amount: 2 },
+            { id: 'retrocede_1_avanza_2', name: 'Atrás 1 / Alante 2', color: '', icon: 'fa-exchange-alt', action: 'RANDOM_MOVE' },
+            { id: 'quitale_prenda', name: 'Quítale Prenda', color: 'danger-tile', icon: 'fa-mask', action: 'LOSE_CLOTHING', amount: 1, target: 'other' },
+            { id: 'masturba', name: 'Estimulación', color: 'danger-tile', icon: 'fa-hand-sparkles', action: 'ACTION', desc: 'Masturba o estimula manualmente la zona íntima de tu pareja durante 2 minutos enteros.' },
+            { id: 'ambos_desnudos', name: '¡Desnudos!', color: 'danger-tile', icon: 'fa-fire', action: 'LOSE_CLOTHING', amount: 99, target: 'both', desc: '¡El calor es insoportable! Ambos debéis quitaros absolutamente toda la ropa que os quede en este instante.' },
+            { id: 'usa_lengua', name: 'Usa la Lengua', color: '', icon: 'fa-comments', action: 'ACTION', desc: 'Usa tu lengua para acariciar de manera erótica la parte del cuerpo de tu pareja que ella elija durante 2 minutos.' },
+            { id: 'vuelve_inicio', name: 'Al Inicio', color: 'danger-tile', icon: 'fa-door-open', action: 'GOTO', pos: 0 }
+        ];
+
+        // Mapeo físico del laberinto en forma de "S" en una cuadrícula 6x6
+        const pathCoords = [
+            [0,0], [1,0], [2,0], [3,0], [4,0], [5,0], // 0-5
+            [5,1], [4,1], [3,1], [2,1], [1,1], [0,1], // 6-11
+            [0,2], [1,2], [2,2], [3,2], [4,2], [5,2], // 12-17
+            [5,3], [4,3], [3,3], [2,3], [1,3], [0,3], // 18-23
+            [0,4], [1,4], [2,4], [3,4], [4,4], [5,4], // 24-29
+            [5,5], [4,5], [3,5], [2,5], [1,5], [0,5]  // 30-35
+        ];
+
+        // Diseño secuencial de casillas del tablero
+        let boardLayout = [
+            'inicio', 'beso_frances', 'carta_ayuda', 'muestra_parte', 'reto', 'quita_prenda',
+            'minijuego', 'retrocede_2', 'reto_secreto', 'beso_arriba_abajo', 'carta_ayuda', 'duelo',
+            'toca_debajo', 'avanza_2', 'reto', 'quitale_prenda', 'minijuego', 'carta_ayuda',
+            'ambos_prenda', 'reto_secreto', 'usa_lengua', 'duelo', 'retrocede_3', 'masturba',
+            'carta_ayuda', 'reto', 'minijuego', 'beso_frances', 'duelo', 'quitale_prenda',
+            'reto_secreto', 'ambos_prenda', 'usa_lengua', 'carta_ayuda', 'vuelve_inicio', 'ambos_desnudos'
+        ];
+
+        // Mazos de Cartas con adiciones sensuales y atrevidas
+        const DECKS = {
+            ayuda: [
+                "Te permite manipular tus dados una vez (válido para tablero o para minijuegos).",
+                "Durante el resto de la partida, cada vez que tu pareja obtenga un 1 en los dados (tablero o minijuegos), deberá quitarse una prenda o coger una carta de reto secreto.",
+                "Te permite manipular los dados de tu pareja una vez (válido para tablero o minijuegos).",
+                "Intercambia tu ficha de jugador con la de tu pareja.",
+                "Haz que tu pareja haga lo que indica tu casilla en tu lugar.",
+                "Recibe una ventaja en un duelo.",
+                "Cambia el contenido de una casilla del tablero por lo que tú quieras.",
+                "Para un reto o duelo, podrás coger dos cartas del mazo y elegir con cuál te quedas.",
+                "En el siguiente turno, tu pareja no podrá avanzar y deberá repetir la indicación de su casilla actual.",
+                "Roba una carta de ayuda a tu pareja.",
+                "Durante dos turnos, tu pareja deberá retroceder en lugar de avanzar tantas casillas como indique el dado.",
+                "Juega esta carta antes de realizar un duelo. Si pierdes, no tendrás que coger una carta de reto secreto.",
+                "Anula una carta de ventaja jugada por tu pareja.",
+                // --- NUEVAS CARTAS ADICIONALES SUPER CALIENTES ---
+                "Sometimiento: Obliga a tu pareja a quedarse quieta y con los ojos vendados durante los próximos 2 turnos mientras le haces lo que desees.",
+                "Veto de Ropa: Juega esta carta para impedir que tu pareja use una carta de ayuda para salvar una prenda de ropa.",
+                "Beso de Fuego: Tu pareja debe besarte apasionadamente en la entrepierna por encima de la ropa cada vez que lance el dado.",
+                "Excitación Doble: Duplica el tiempo del próximo reto físico que le toque realizar a tu pareja."
+            ],
+            reto: [
+                "Levanta tu camiseta o baja tus pantalones para que tu pareja te toque. Después vuelve a colocarte bien la ropa. Si ya estáis desnudos, solo deja que tu pareja te toque.",
+                "Tienes dos minutos para calentar a tu pareja tanto como puedas. No te olvides de comprobar lo húmeda o excitada que la has puesto.",
+                "Todas las casillas de 'carta de ayuda' se convierten en cartas de 'reto secreto' durante los próximos 3 turnos.",
+                "Durante tres turnos deberás susurrar seductoramente en el oído de tu pareja cada vez que quieras hablar. Puedes acompañarlo de frases como 'hazme tuya/o' o sonidos como 'shhh'.",
+                "Deberás cerrar los ojos durante dos turnos. Tu pareja puede sabotearte moviendo tu ficha de jugador, inventándose el resultado de los dados o de las cartas de reto o duelo, robando cartas de ayuda... etc... o puede aprovechar para tocarte...",
+                "Durante dos turnos no mires ninguna parte del cuerpo de tu pareja que no sea la cara, sin importar lo tentadora que sea. Retrocede dos casillas cada vez que falles.",
+                "Realiza el minijuego de los dados, pero no le digas a tu pareja lo que te ha salido y directamente hazlo sin previo aviso.",
+                "Toca y besa a tu pareja donde tú quieras de manera ininterrumpida durante 3 minutos.",
+                "Durante el próximo turno, no podrás separar los labios del cuerpo de tu pareja.",
+                "El jugador que va más atrás en el tablero se quita una prenda inmediatamente.",
+                "El jugador que va más atrás en el tablero coge una carta de reto secreto.",
+                "Durante el próximo turno, no podrás separar las manos del cuerpo de tu pareja (deben estar en contacto constante con su piel).",
+                "Durante dos turnos, debes hacer tú también los retos que aparecen en las casillas de tu pareja.",
+                "Descarta todas tus cartas de ayuda. Si no tienes ninguna, coge una carta de reto secreto.",
+                "Toca y besa la parte del cuerpo del tronco de tu pareja que más te guste y explícale por qué es tu parte favorita.",
+                "Colócate detrás de tu pareja y susúrrale cosas calientes al oído mientras la acaricias íntimamente.",
+                // --- NUEVAS CARTAS ADICIONALES SUPER CALIENTES ---
+                "Striptease Extremo: Quítate una prenda de ropa utilizando únicamente los dientes, de forma sensual y frente a tu pareja.",
+                "Recorrido de Hielo: Pasa un cubito de hielo (o algo frío) por los pezones o la zona íntima de tu pareja durante 1.5 minutos.",
+                "A horcajadas: Siéntate a horcajadas sobre el regazo de tu pareja y bésala apasionadamente con lengua durante 2 minutos sin usar las manos.",
+                "Sumisión oral: Pasa tu lengua por la zona íntima de tu pareja de manera constante y rítmica durante 2 minutos completos."
+            ],
+            secreto: [
+                "Haz trampa sin que tu pareja se entere (por ejemplo en el dado o moviendo tu ficha). Si lo consigues durante este turno, pásale esta carta para que se quite una prenda.",
+                "Durante un turno, solo podrás mirar fijamente y de forma descarada las partes íntimas de tu pareja.",
+                "Empieza acariciando la pierna de tu pareja de forma disimulada e inocente y poco a poco acércate a su zona íntima.",
+                "Sin decir nada, empuja a tu pareja con cuidado para tumbarla en la cama o el sofá. Después bésala y tócala con pasión.",
+                "Líbrate de esta carta ocultándola en la habitación sin que tu pareja te descubra. Si te pilla en el intento, quítate una prenda inmediatamente.",
+                "Durante dos turnos, acércate tanto a tu pareja como puedas. Intenta mantener contacto físico pegado a ella todo el tiempo.",
+                "Sin decir nada, sujeta firmemente las manos de tu pareja sobre su cabeza y bésala con salvaje intensidad.",
+                "Sin decir nada, quítale una prenda a tu pareja, bésala y tócala. Si ya está desnuda, solo bésala y acaríciala salvajemente.",
+                "Sin decir nada, toma la mano de tu pareja y colócala directamente sobre tu zona íntima. Después bésala.",
+                "Sin decir nada, quítate una prenda y lánzasela a la cara a tu pareja. Si ya estás desnudo/a, bésala con fervor de imprevisto.",
+                "Elige un número del 1 al 6. Cada vez que alguien obtenga esa cantidad en los dados, debes besar a tu pareja donde tú quieras.",
+                "Durante dos turnos, trata de distraer a tu pareja con besos húmedos y tocamientos atrevidos cada vez que intente lanzar los dados.",
+                "Durante un turno, interrumpe a tu pareja con besos apasionados cada vez que intente hablar.",
+                "Elige un número del 1 al 6. Cada vez que alguien obtenga esa cantidad en los dados, deberás tocar intensamente la zona íntima de tu pareja.",
+                // --- NUEVAS CARTAS ADICIONALES SUPER CALIENTES ---
+                "Gemidos simulados: Durante el próximo turno, debes emitir un suave gemido cada vez que inhales o exhales al hablar.",
+                "La Mordida: Sin decir nada, muerde con cuidado el muslo interno de tu pareja y dale un suave azote.",
+                "Fantasía en Voz Alta: Explica a tu pareja, detallando cada caricia, la fantasía erótica que te gustaría realizar justo al acabar esta partida."
+            ],
+            duelo: [
+                "Pelea de almohadas... ¿Con final feliz? En este duelo no hay ganador ni perdedor, por lo que nadie coge carta al final. (Ventaja: Tu oponente solo puede usar una mano).",
+                "Juego de compartir o robar: Robar = reto secreto, Compartir = carta de ayuda. Se puede robar o compartir 1 o 2 cartas. (Ventaja: Podrás elegir tu opción después de tu oponente).",
+                "Jugador 1: Quítale una prenda a Jugador 2 o toma una prenda que ya se haya quitado y escóndela por la habitación sin que mire. Jugador 2: Tienes un minuto para encontrarla con los ojos cerrados. (Ventaja J1: Distraer tocando. Ventaja J2: J1 debe decir frío o caliente).",
+                "Jugador 1 escribe una letra en el cuerpo de Jugador 2 usando la punta de la lengua. Jugador 2 debe adivinarla con los ojos cerrados. (Ventaja 1: Usar mayúsculas/minúsculas. Ventaja 2: Escribir un número en vez de una letra).",
+                "Concurso de miradas fijas sin parpadear, pero se permite distraer al rival mediante tocamientos y caricias atrevidas. (Ventaja: Tu oponente no podrá tocarte con las manos).",
+                "Poned el cronómetro: Comprobad quién tarda menos tiempo en quitarle una prenda al otro sin usar las manos. (Ventaja: Puedes elegir de antemano la prenda exacta que debe quitarte).",
+                "Jugad a Simón dice. El primero que no supere una prueba erótica o sugerente impuesta por el otro pierde. (Ventaja: Por cada turno que tu pareja sea Simón, tú lo serás dos veces).",
+                "Debéis besaros con extrema pasión (no necesariamente en la boca) pero sin usar las manos. El primero que toque al otro con las manos pierde. (Ventaja: Tu pareja pierde si te toca con cualquier parte del cuerpo que no sea la boca).",
+                "Poned el cronómetro: Comprobad quién tarda menos tiempo en conseguir que el otro emita un gemido claro o tenga un estremecimiento. (Ventaja: Súmale 30 segundos al tiempo de tu cronómetro).",
+                "Jugador 1, tienes dos minutos para quitarle una prenda a Jugador 2. (Ventaja: Tu oponente tendrá que tener los ojos vendados o cerrados en todo momento).",
+                "Quien pare el cronómetro más cerca de los 5.00 segundos exactos (sin mirarlo) puede elegir la eliminación de prenda de su pareja. (Ventaja: El usuario de esta carta SÍ puede mirar la pantalla).",
+                // --- NUEVAS CARTAS ADICIONALES SUPER CALIENTES ---
+                "Duelo de Sensibilidad: Acariciad suavemente el cuello del otro usando un solo dedo. El primero que se estremezca, retire la cabeza o ría, pierde el duelo."
+            ]
+        };
+
+        const MINIGAME_ACTIONS = ["Besa", "Lame", "Muerde suavemente", "Acaricia con los labios", "Sopla suavemente en", "Chupa"];
+        const MINIGAME_PARTS = ["el Cuello", "los Labios", "el Ombligo", "el Pecho", "detrás de la Oreja", "el Muslo interno"];
+
+        // Estado del Juego
+        const STATE = {
+            turn: 0, // 0 = Jugador A, 1 = Jugador L
+            players: [
+                { id: 'A', name: 'Jugador A', pos: 0, clothes: 7, inventory: [] },
+                { id: 'L', name: 'Jugador L', pos: 0, clothes: 7, inventory: [] }
+            ],
+            activeCard: null,
+            timerInterval: null,
+            timeLeft: 120
+        };
+
+        // Función para barajar un array (Algoritmo de Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Inicializar el tablero de juego
+        function initBoard() {
+            const boardEl = document.getElementById('game-board');
+            boardEl.innerHTML = '';
+
+            // Barajar casillas intermedias (manteniendo Inicio al principio y ¡Desnudos! al final)
+            const startTile = boardLayout[0];
+            const endTile = boardLayout[boardLayout.length - 1];
+            const middleTiles = boardLayout.slice(1, boardLayout.length - 1);
+            
+            shuffleArray(middleTiles);
+            
+            boardLayout = [startTile, ...middleTiles, endTile];
+
+            // Generar casillas físicas
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                const layoutId = boardLayout[i];
+                const tileDef = TILE_TYPES.find(t => t.id === layoutId);
+                const coords = pathCoords[i];
+                
+                const div = document.createElement('div');
+                div.className = `tile ${tileDef.color} ${i===0 ? 'start-tile' : ''}`;
+                
+                // Asignar posición en la cuadrícula CSS Grid
+                div.style.gridColumn = coords[0] + 1;
+                div.style.gridRow = coords[1] + 1;
+                
+                div.innerHTML = `
+                    <div class="flex flex-col items-center pointer-events-none">
+                        <i class="fas ${tileDef.icon} text-lg mb-1"></i>
+                        <span style="font-size: 0.52rem; line-height: 1.1;" class="font-semibold text-center">${tileDef.name}</span>
+                    </div>
+                `;
+                // Reemplazado alert() por el modal de acción de forma segura
+                div.onclick = () => {
+                    showActionModal(tileDef.name, tileDef.desc || 'Casilla especial del tablero. Sigue las instrucciones correspondientes cuando caigas aquí.', false);
+                };
+                boardEl.appendChild(div);
+            }
+
+            // Crear dinámicamente las fichas de los jugadores DENTRO del tablero
+            const tokenA = document.createElement('div');
+            tokenA.id = 'token-A';
+            tokenA.className = 'token token-A';
+            tokenA.innerText = 'A';
+            
+            const tokenL = document.createElement('div');
+            tokenL.id = 'token-L';
+            tokenL.className = 'token token-L';
+            tokenL.innerText = 'L';
+
+            boardEl.appendChild(tokenA);
+            boardEl.appendChild(tokenL);
+
+            updateClothesUI();
+            updateTokens();
+        }
+
+        // Posicionar las fichas tridimensionalmente en base a su casilla actual
+        function updateTokens() {
+            STATE.players.forEach((p) => {
+                const coords = pathCoords[p.pos];
+                const tokenEl = document.getElementById(`token-${p.id}`);
+                
+                if (tokenEl) {
+                    // El tablero mide 500px por 500px planos
+                    const cellSize = 500 / 6;
+                    
+                    // Calculamos la posición exacta del centro de la celda en la cuadrícula
+                    const left = (coords[0] * cellSize) + (cellSize / 2);
+                    const top = (coords[1] * cellSize) + (cellSize / 2);
+
+                    tokenEl.style.left = `${left}px`;
+                    tokenEl.style.top = `${top}px`;
+                }
+            });
+        }
+
+        // Animación de lanzamiento de dados
+        function rollDiceAndMove() {
+            const btn = document.getElementById('btn-roll');
+            const diceEl = document.getElementById('dice-display');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            
+            diceEl.classList.add('rolling');
+            
+            let rollInterval = setInterval(() => {
+                diceEl.innerText = Math.floor(Math.random() * 6) + 1;
+            }, 80);
+
+            setTimeout(() => {
+                clearInterval(rollInterval);
+                diceEl.classList.remove('rolling');
+                const roll = Math.floor(Math.random() * 6) + 1;
+                diceEl.innerText = roll;
+                
+                moveCurrentPlayer(roll);
+            }, 700);
+        }
+
+        // Movimiento paso a paso por las casillas del tablero
+        function moveCurrentPlayer(steps) {
+            const p = STATE.players[STATE.turn];
+            let currentStep = 0;
+            const absoluteSteps = Math.abs(steps);
+            
+            const moveInterval = setInterval(() => {
+                if (steps > 0) {
+                    p.pos++;
+                    if (p.pos >= BOARD_SIZE) p.pos = 0; // Vuelve a empezar en bucle
+                } else {
+                    p.pos--;
+                    if (p.pos < 0) p.pos = 0;
+                }
+                
+                updateTokens();
+                currentStep++;
+
+                if (currentStep >= absoluteSteps) {
+                    clearInterval(moveInterval);
+                    setTimeout(() => resolveTile(p), 450);
+                }
+            }, 200);
+        }
+
+        // Resolver la acción de la casilla donde cae el jugador
+        function resolveTile(player) {
+            const layoutId = boardLayout[player.pos];
+            const tileDef = TILE_TYPES.find(t => t.id === layoutId);
+
+            switch(tileDef.action) {
+                case 'START':
+                    showActionModal(tileDef.name, "Un respiro temporal en el nido de amor. Prepárate para lo que viene...", true);
+                    break;
+                case 'ACTION':
+                    showActionModal(tileDef.name, tileDef.desc, true, true);
+                    break;
+                case 'LOSE_CLOTHING':
+                    if (tileDef.target === 'self' || tileDef.target === 'both') {
+                        loseClothing(player.id, tileDef.amount);
+                    }
+                    if (tileDef.target === 'other' || tileDef.target === 'both') {
+                        const otherId = player.id === 'A' ? 'L' : 'A';
+                        loseClothing(otherId, tileDef.amount);
+                    }
+                    
+                    let msg = "";
+                    if (tileDef.target === 'self') msg = `¡Mala suerte! Te toca desnudarte un poco más. Quítate 1 prenda.`;
+                    else if (tileDef.target === 'other') msg = `¡Qué suerte! Obliga a tu pareja a desnudarse un poco más. Se quita 1 prenda.`;
+                    else if (tileDef.target === 'both') msg = (tileDef.amount === 99) ? tileDef.desc : `¡El calor sube! Ambos os quitáis 1 prenda de ropa inmediatamente.`;
+                    
+                    showActionModal(tileDef.name, msg, true);
+                    break;
+                case 'DRAW_HELP':
+                    drawCard('ayuda', player);
+                    break;
+                case 'DRAW_CHALLENGE':
+                    drawCard('reto', player);
+                    break;
+                case 'DRAW_SECRET':
+                    drawCard('secreto', player);
+                    break;
+                case 'DRAW_DUEL':
+                    drawCard('duelo', player);
+                    break;
+                case 'MINIGAME':
+                    openMinigameModal();
+                    break;
+                case 'MOVE':
+                    showActionModal(tileDef.name, `La pasión te arrastra. Te mueves ${tileDef.amount} casillas.`, false);
+                    setTimeout(() => {
+                        closeActionModalOnly();
+                        moveCurrentPlayer(tileDef.amount);
+                    }, 2500);
+                    break;
+                case 'RANDOM_MOVE':
+                    const randomChoice = Math.random() > 0.5 ? -1 : 2;
+                    const randomMsg = randomChoice === -1 ? "Mala suerte, retrocedes 1 casilla." : "¡Qué suerte! Avanzas 2 casillas.";
+                    showActionModal(tileDef.name, randomMsg, false);
+                    setTimeout(() => {
+                        closeActionModalOnly();
+                        moveCurrentPlayer(randomChoice);
+                    }, 2500);
+                    break;
+                case 'GOTO':
+                    player.pos = tileDef.pos;
+                    updateTokens();
+                    showActionModal(tileDef.name, "Has sido devuelto a la casilla de inicio de la pasión. Respira hondo y vuelve a empezar.", true);
+                    break;
+            }
+        }
+
+        // Robar carta de un mazo
+        function drawCard(type, player) {
+            const deck = DECKS[type];
+            const randomText = deck[Math.floor(Math.random() * deck.length)];
+            
+            STATE.activeCard = { type, text: randomText, owner: player.id };
+
+            const modal = document.getElementById('card-modal');
+            const visual = document.getElementById('card-visual');
+            const typeLabel = document.getElementById('card-type-label');
+            const icon = document.getElementById('card-icon');
+            const textEl = document.getElementById('card-text');
+            const btnSave = document.getElementById('btn-save-card');
+            
+            visual.className = 'card-visual mb-6 w-full'; 
+            
+            if(type === 'ayuda') {
+                visual.classList.add('card-ayuda');
+                typeLabel.innerText = "Carta de Ayuda";
+                icon.className = "fas fa-gift text-5xl mb-5 opacity-80";
+                btnSave.style.display = 'block'; 
+            } else if (type === 'reto') {
+                visual.classList.add('card-reto');
+                typeLabel.innerText = "Carta de Reto";
+                icon.className = "fas fa-fire-alt text-5xl mb-5 opacity-80";
+                btnSave.style.display = 'none'; 
+            } else if (type === 'secreto') {
+                visual.classList.add('card-secreto');
+                typeLabel.innerText = "Reto Secreto";
+                icon.className = "fas fa-user-secret text-5xl mb-5 opacity-80";
+                btnSave.style.display = 'block'; 
+            } else if (type === 'duelo') {
+                visual.classList.add('card-duelo');
+                typeLabel.innerText = "¡Duelo de Pareja!";
+                icon.className = "fas fa-swords text-5xl mb-5 opacity-80";
+                btnSave.style.display = 'none'; 
+            }
+
+            textEl.innerText = randomText;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+        }
+
+        // Usar la carta robada en ese mismo instante
+        function useCardImmediate() {
+            document.getElementById('card-modal').classList.add('opacity-0');
+            setTimeout(() => { 
+                document.getElementById('card-modal').classList.add('hidden');
+                nextTurn(); 
+            }, 300);
+        }
+
+        // Guardar la carta en el inventario del jugador
+        function saveCardToInventory() {
+            if(!STATE.activeCard) return;
+            const pId = STATE.activeCard.owner;
+            const player = STATE.players.find(p => p.id === pId);
+            
+            player.inventory.push(STATE.activeCard);
+            updateInventoryUI(pId);
+            
+            document.getElementById('card-modal').classList.add('opacity-0');
+            setTimeout(() => { 
+                document.getElementById('card-modal').classList.add('hidden');
+                nextTurn(); 
+            }, 300);
+        }
+
+        // Usar carta desde el panel de inventario
+        function useCardFromInventory(pId, cardIndex) {
+            const player = STATE.players.find(p => p.id === pId);
+            const card = player.inventory[cardIndex];
+            
+            // Mostrar modal de acción simple para ejecutar la carta guardada
+            showActionModal("Usando " + (card.type === 'ayuda' ? 'Carta de Ayuda' : 'Reto Secreto'), card.text, false);
+            
+            // Eliminar del array
+            player.inventory.splice(cardIndex, 1);
+            updateInventoryUI(pId);
+        }
+
+        // Pintar el inventario en pantalla
+        function updateInventoryUI(pId) {
+            const player = STATE.players.find(p => p.id === pId);
+            const container = document.getElementById(`inventory-${pId}`);
+            
+            if (player.inventory.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 italic">Sin cartas guardadas</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            player.inventory.forEach((card, index) => {
+                const colorClass = card.type === 'ayuda' ? 'text-teal-400 border-teal-800' : 'text-amber-400 border-amber-800';
+                const icon = card.type === 'ayuda' ? 'fa-gift' : 'fa-user-secret';
+                
+                const div = document.createElement('div');
+                div.className = `p-2 rounded-xl border border-purple-950 bg-black/30 flex justify-between items-center hover:bg-black/50 transition duration-300`;
+                div.innerHTML = `
+                    <div class="flex items-center truncate max-w-[65%]" title="${card.text}">
+                        <i class="fas ${icon} ${colorClass} mr-2 text-sm flex-shrink-0"></i>
+                        <span class="text-[11px] text-gray-300 truncate">${card.text}</span>
+                    </div>
+                    <button class="text-[10px] bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold px-2.5 py-1 rounded-lg transition" onclick="useCardFromInventory('${pId}', ${index}); event.stopPropagation();">Usar</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Quitar una prenda de ropa al jugador
+        function loseClothing(playerId, amount) {
+            const player = STATE.players.find(p => p.id === playerId);
+            player.clothes -= amount;
+            if (player.clothes <= 0) {
+                player.clothes = 0;
+                updateClothesUI();
+                setTimeout(() => {
+                    showGameOverModal(player);
+                }, 600);
+            } else {
+                updateClothesUI();
+            }
+        }
+
+        // Renderizar los iconos de prendas de vestir
+        function updateClothesUI() {
+            STATE.players.forEach(p => {
+                const container = document.getElementById(`clothes-${p.id}`);
+                container.innerHTML = '';
+                for(let i=0; i<p.clothes; i++) {
+                    container.innerHTML += `<i class="fas fa-tshirt text-lg drop-shadow-md" style="color: ${p.id==='A' ? 'var(--neon-blue)' : 'var(--accent-red)'}"></i>`;
+                }
+                if(p.clothes === 0) {
+                    container.innerHTML = `<span class="text-rose-500 font-bold uppercase text-xs animate-pulse tracking-widest"><i class="fas fa-fire mr-1"></i>¡Completamente Desnudo/a!</span>`;
+                }
+            });
+        }
+
+        // Cambiar de turno
+        function nextTurn() {
+            STATE.turn = STATE.turn === 0 ? 1 : 0;
+            const currentPlayer = STATE.players[STATE.turn];
+            
+            // Cambiar textos e indicadores de estado
+            const indicator = document.getElementById('turn-indicator');
+            indicator.innerHTML = `Turno de: <span class="font-bold tracking-wide" style="color: ${currentPlayer.id === 'A' ? 'var(--neon-blue)' : 'var(--accent-red)'}">${currentPlayer.name}</span>`;
+            
+            const statusA = document.getElementById('player-status-A');
+            const statusL = document.getElementById('player-status-L');
+            
+            if (STATE.turn === 0) {
+                statusA.className = "text-xs bg-teal-950 text-teal-300 px-2 py-0.5 rounded border border-teal-800";
+                statusA.innerText = "Activo";
+                statusL.className = "text-xs bg-purple-950/40 text-gray-500 px-2 py-0.5 rounded border border-purple-950";
+                statusL.innerText = "Espera";
+            } else {
+                statusL.className = "text-xs bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800";
+                statusL.innerText = "Activo";
+                statusA.className = "text-xs bg-purple-950/40 text-gray-500 px-2 py-0.5 rounded border border-purple-950";
+                statusA.innerText = "Espera";
+            }
+
+            const btn = document.getElementById('btn-roll');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+        }
+
+        // Mostrar modal personalizado (sustituto del alert)
+        function showActionModal(title, desc, autoNextTurn = true, showTimerOption = false) {
+            document.getElementById('action-title').innerText = title;
+            document.getElementById('action-desc').innerText = desc;
+            
+            const timerTrigger = document.getElementById('action-timer-trigger');
+            if (showTimerOption) {
+                timerTrigger.classList.remove('hidden');
+            } else {
+                timerTrigger.classList.add('hidden');
+            }
+
+            const iconEl = document.getElementById('action-modal-icon');
+            // Cambiar icono del modal según el tipo
+            if (title.includes("Duelo") || title.includes("DUELO")) {
+                iconEl.className = "fas fa-swords text-2xl text-red-400";
+            } else if (title.includes("Prenda") || title.includes("ropa") || title.includes("Desnudos")) {
+                iconEl.className = "fas fa-tshirt text-2xl text-amber-400";
+            } else {
+                iconEl.className = "fas fa-kiss-wink-heart text-2xl text-pink-400";
+            }
+            
+            const modal = document.getElementById('action-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 15);
+            
+            const btn = document.getElementById('btn-action-close');
+            btn.onclick = () => {
+                modal.classList.add('opacity-0');
+                setTimeout(() => { 
+                    modal.classList.add('hidden'); 
+                    if(autoNextTurn) nextTurn();
+                }, 300);
+            };
+        }
+
+        function closeActionModalOnly() {
+            const modal = document.getElementById('action-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // Lanzar cronómetro de manera directa desde un modal de reto
+        function startActionTimer(seconds) {
+            closeActionModalOnly();
+            setTimer(seconds);
+            openTimerModal();
+            startTimer();
+        }
+
+        // Mostrar el modal de fin del juego
+        function showGameOverModal(loserPlayer) {
+            const winnerName = loserPlayer.id === 'A' ? 'Jugador L' : 'Jugador A';
+            const winnerColor = loserPlayer.id === 'A' ? 'var(--accent-red)' : 'var(--neon-blue)';
+            
+            showActionModal(
+                "¡FIN DEL JUEGO!", 
+                `El ${loserPlayer.name} se ha quedado sin prendas de vestir y ha "perdido" el juego. ¡Felicidades al ganador/a (${winnerName})! Aunque en este juego... ¡ambos ganáis un final inolvidable! 😉🔥`, 
+                false
+            );
+        }
+
+        // Minijuego de Dados de la Pasión
+        function openMinigameModal() {
+            document.getElementById('minigame-result').innerText = '';
+            document.getElementById('dice-action').innerText = '?';
+            document.getElementById('dice-body').innerText = '?';
+            document.getElementById('btn-roll-minigame').classList.remove('hidden');
+            document.getElementById('btn-close-minigame').classList.add('hidden');
+            document.getElementById('minigame-modal').classList.remove('hidden');
+        }
+
+        function rollMinigame() {
+            const d1 = document.getElementById('dice-action');
+            const d2 = document.getElementById('dice-body');
+            const result = document.getElementById('minigame-result');
+            
+            d1.classList.add('rolling');
+            d2.classList.add('rolling');
+            result.innerText = "Lanzando los dados del deseo...";
+
+            setTimeout(() => {
+                d1.classList.remove('rolling');
+                d2.classList.remove('rolling');
+                
+                const aIdx = Math.floor(Math.random() * MINIGAME_ACTIONS.length);
+                const pIdx = Math.floor(Math.random() * MINIGAME_PARTS.length);
+                
+                d1.innerHTML = `<i class="fas fa-hand-pointer text-pink-500 text-xl"></i>`;
+                d2.innerHTML = `<i class="fas fa-heart text-purple-500 text-xl"></i>`;
+                
+                result.innerHTML = `<span class="text-pink-400">${MINIGAME_ACTIONS[aIdx]}</span> <span class="text-white mx-1.5 font-normal">en</span> <span class="text-purple-400">${MINIGAME_PARTS[pIdx]}</span> <span class="text-xs text-yellow-400 block mt-1"><i class="fas fa-stopwatch mr-1"></i>(Duración estándar: 2 Minutos)</span>`;
+                
+                document.getElementById('btn-roll-minigame').classList.add('hidden');
+                document.getElementById('btn-close-minigame').classList.remove('hidden');
+            }, 750);
+        }
+
+        function closeMinigameModal() {
+            document.getElementById('minigame-modal').classList.add('hidden');
+            nextTurn();
+        }
+
+        // Cronómetro
+        function openTimerModal() {
+            document.getElementById('timer-modal').classList.remove('hidden');
+            updateTimerDisplay();
+        }
+
+        function closeTimerModal() {
+            document.getElementById('timer-modal').classList.add('hidden');
+        }
+
+        function setTimer(seconds) {
+            stopTimer();
+            STATE.timeLeft = seconds;
+            updateTimerDisplay();
+        }
+
+        function startTimer() {
+            if (STATE.timerInterval) return;
+            document.getElementById('timer-display').classList.add('active');
+            
+            STATE.timerInterval = setInterval(() => {
+                STATE.timeLeft--;
+                updateTimerDisplay();
+                
+                if(STATE.timeLeft <= 0) {
+                    stopTimer();
+                    document.getElementById('timer-display').classList.remove('active');
+                    showActionModal("¡TIEMPO AGOTADO!", "El tiempo establecido para realizar la acción se ha consumido. ¡Esperamos que lo hayáis disfrutado!", false);
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(STATE.timerInterval);
+            STATE.timerInterval = null;
+            document.getElementById('timer-display').classList.remove('active');
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(STATE.timeLeft / 60).toString().padStart(2, '0');
+            const secs = (STATE.timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+        }
+
+        function showRules() {
+            showActionModal(
+                "Reglas de la Pasión", 
+                "1. Tira el dado para moverte por el sinuoso camino 3D.\n2. Cumple el reto o acción de la casilla donde caigas. Si un reto físico o carta no especifica tiempo de ejecución, por defecto serán 2 minutos (usa el cronómetro integrado).\n3. Si decides no cumplir una acción o fallas, tienes que quitarte una prenda de ropa de inmediato.\n4. Las Cartas de Ayuda y los Retos Secretos se guardan en tu inventario. Haz click en 'Usar' en tu panel lateral en cualquier momento de tu turno.\n5. El primero que se quede sin prendas de vestir (0 prendas) pierde la partida... ¡aunque en realidad ambos ganáis la noche!", 
+                false
+            );
+        }
+
+        // Inicializar la aplicación al cargar la ventana
+        window.onload = () => {
+            initBoard();
+        };
+
+    </script>
+</body>
+</html>
