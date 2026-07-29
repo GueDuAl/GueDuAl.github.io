@@ -24,6 +24,13 @@ const catalogoArchivos = [
             "ES": "El Hobbit.pdf",
             "EN": "El Hobbit_en.pdf"
         }
+    },
+    {
+        id: "El Rithmatista",
+        archivos: {
+            "ES": "El Rithmatista.pdf",
+            "EN": "El Rithmatista_en.pdf"
+        }
     }
 ];
 
