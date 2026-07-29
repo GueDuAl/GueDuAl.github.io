@@ -1,0 +1,280 @@
+:root {
+    --bg-color: #141414;
+    --text-color: #ffffff;
+    --primary-color: #E50914;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 4%;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    color: var(--primary-color);
+    font-size: 2rem;
+    font-weight: bold;
+    margin-right: 40px;
+    letter-spacing: 2px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: #e5e5e5;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: white;
+}
+
+/* Buscador de Libros en el Navbar */
+.search-box {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    padding: 6px 12px;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.search-box:focus-within {
+    border-color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+.search-icon {
+    color: #aaa;
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+#search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 0.9rem;
+    width: 180px;
+    transition: width 0.3s ease;
+}
+
+#search-input::placeholder {
+    color: #aaa;
+}
+
+#search-input:focus {
+    width: 240px;
+}
+
+/* Hero Section (Libro Destacado, tamaño más compacto) */
+.hero {
+    height: 65vh;
+    background-color: #111;
+    background-size: cover;
+    background-position: center 25%;
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: background-image 0.5s ease-in-out;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(to top, var(--bg-color) 0%, transparent 100%);
+}
+
+.hero-content {
+    margin-left: 4%;
+    max-width: 650px;
+    z-index: 10;
+    padding-top: 30px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    margin-bottom: 25px;
+    text-shadow: 2px 4px 8px rgba(0,0,0,0.8);
+}
+
+/* Acciones y Selector de Idioma en el Hero */
+.hero-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.btn-play {
+    background-color: white;
+    color: black;
+}
+
+.btn-play:hover {
+    background-color: rgba(255,255,255,0.7);
+}
+
+.btn-download {
+    background-color: rgba(109, 109, 110, 0.7);
+    color: white;
+}
+
+.btn-download:hover {
+    background-color: rgba(109, 109, 110, 0.4);
+}
+
+/* Desplegable / Etiqueta de Idioma */
+.hero-language {
+    display: flex;
+    align-items: center;
+}
+
+.lang-select {
+    background-color: rgba(20, 20, 20, 0.85);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: border-color 0.2s;
+}
+
+.lang-select:hover, .lang-select:focus {
+    border-color: #ffffff;
+}
+
+.lang-badge {
+    background-color: rgba(109, 109, 110, 0.4);
+    color: #e5e5e5;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+}
+
+/* Filas de Libros */
+.container {
+    padding: 0 4%;
+    margin-top: -30px;
+    position: relative;
+    z-index: 10;
+}
+
+.book-row {
+    margin-bottom: 40px;
+}
+
+.row-title {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: #e5e5e5;
+}
+
+.row-posters {
+    display: flex;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    padding: 15px 0;
+    gap: 15px;
+    scroll-behavior: smooth;
+}
+
+.row-posters::-webkit-scrollbar {
+    display: none;
+}
+
+.row-posters {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.row-poster {
+    width: 160px;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 4px;
+    transition: transform 450ms;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+}
+
+.row-poster:hover {
+    transform: scale(1.12);
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .navbar { flex-direction: column; gap: 15px; padding: 15px 4%; }
+    .nav-links { display: none; }
+    .search-box { width: 100%; }
+    #search-input { width: 100%; }
+    #search-input:focus { width: 100%; }
+    .hero-title { font-size: 2.2rem; }
+    .hero-actions { flex-direction: column; align-items: flex-start; }
+    .hero-buttons { width: 100%; flex-direction: column; }
+    .hero { height: 50vh; }
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookflix | Libros Online</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Barra de Navegación -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo">BOOKFLIX</h1>
+            <ul class="nav-links">
+                <li><a href="#">Inicio</a></li>
+            </ul>
+        </div>
+
+        <!-- Buscador de Libros -->
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="search-input" placeholder="Buscar por título...">
+        </div>
+    </nav>
+
+    <!-- Libro Destacado (Hero Section compacta sin descripción) -->
+    <header class="hero" id="hero-section">
+        <div class="hero-content" style="padding-top: 60px;">
+            <h2>Cargando biblioteca...</h2>
+        </div>
+    </header>
+
+    <!-- Filas de Categorías -->
+    <main class="container">
+        <section class="book-row">
+            <h3 class="row-title">Tus Libros</h3>
+            <div class="row-posters" id="book-row">
+                <!-- Se generará dinámicamente mediante script.js -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
