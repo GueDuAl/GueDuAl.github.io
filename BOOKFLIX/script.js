@@ -31,6 +31,13 @@ const catalogoArchivos = [
             "ES": "El Rithmatista.pdf",
             "EN": "El Rithmatista_en.pdf"
         }
+    },
+    {
+        id: "El Iniciado",
+        archivos: {
+            "ES": "El Iniciado.pdf",
+            "EN": "El Iniciado_en.pdf"
+        }
     }
 ];
 
