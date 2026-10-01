@@ -1,70 +1,118 @@
-# Saturn Loan
+# Saturn Loan — versión online
 
-Web local para gestionar una colección de videojuegos y préstamos entre amigos.
+Esta versión corrige el problema de que los juegos añadidos solo aparezcan en el ordenador que los creó.
 
-## Qué incluye
+## Qué cambia
 
-- Catálogo de juegos.
-- Filtros por plataforma y disponibilidad.
-- Alta, edición y eliminación de juegos desde el modo administrador.
-- Registro de préstamos con persona, fecha de salida, duración y fecha de devolución.
-- Detección automática de préstamos atrasados.
-- Cálculo de recargo recomendado por retraso.
-- Servicios de modificación/homebrew y mantenimiento.
-- Diseño responsive para ordenador y móvil.
-- Persistencia con `localStorage`.
+La versión antigua utilizaba `localStorage`, que pertenece al navegador/dispositivo de cada usuario. Por eso:
+- el ordenador A podía guardar un juego;
+- el ordenador B no podía verlo;
+- el modo incógnito tampoco veía los datos del navegador normal.
 
-## Cómo abrirla
+Ahora Saturn Loan utiliza una base de datos central de **Supabase**. Todos los navegadores consultan la misma colección online.
 
-1. Descarga la carpeta.
-2. Abre `index.html` con Chrome, Edge o Firefox.
-3. Para entrar como administrador, usa la clave de demostración:
+## Archivos
 
-`SATURNO2000`
+- `index.html` → página.
+- `styles.css` → diseño.
+- `app.js` → funcionamiento.
+- `config.js` → conexión con Supabase.
+- `supabase.sql` → tablas, permisos, datos iniciales y Realtime.
 
-## Importante sobre la versión actual
+## Configuración paso a paso
 
-Esta versión es un **prototipo local**. Los datos se guardan en el navegador mediante `localStorage`.
-Eso significa que no existe todavía una base de datos compartida ni una autenticación segura de verdad.
+### 1. Crear el proyecto
 
-Si la vas a publicar para que funcione desde varios dispositivos, el siguiente paso recomendable es añadir:
+Crea un proyecto gratuito en Supabase.
 
-- backend y base de datos (por ejemplo, Supabase/Firebase);
-- usuarios reales con roles `admin` y `friend`;
-- registro de amigos;
-- control de pagos;
-- copias de seguridad;
-- fotografías de portadas;
-- historial completo de cada juego;
-- panel móvil para marcar devoluciones.
+En el proyecto busca los datos de conexión y copia:
+- Project URL.
+- Publishable Key.
 
-## Modelo de negocio recomendado
+La librería JavaScript de Supabase se puede utilizar directamente desde un navegador y necesita esa URL y esa clave pública. **No uses la `service_role` key en la web.** citeturn348234search0turn348234search2
 
-Para un club pequeño entre amigos recomiendo evitar una suscripción.
+### 2. Crear las tablas
 
-### Préstamos
-- 1 € → 7 días.
-- 2 € → 14 días.
-- 3 € → 30 días.
-- Retraso → 0,50 €/día, con un máximo de 5 €.
-- Para amigos de mucha confianza se puede perdonar el recargo si avisan y devuelven el juego.
-- En juegos caros, una fianza pequeña (5–10 €) puede utilizarse como garantía y se devuelve al entregar el juego en buen estado.
+Abre `SQL Editor` en Supabase, crea una consulta nueva, pega TODO el contenido de:
 
-La idea es que el precio cubra mantenimiento, desgaste, transporte y reposición, no convertirlo en un videoclub tradicional.
+`supabase.sql`
 
-### Servicios
-Precios orientativos para tu propio proyecto:
-- Wii → desde 10 €
-- Wii U → desde 15 €
-- DS → desde 10 €
-- 3DS → desde 15 €
-- 2DS → desde 15 €
-- PSP → desde 15 €
-- PS Vita → desde 20 €
-- Mantenimiento/revisión → desde 5 €
+y ejecútalo.
 
-Los servicios de modificación están planteados para **consolas propiedad del cliente y usos legales de homebrew**. No se incluyen ROMs, juegos pirateados ni contenido no autorizado.
+El SQL crea:
+- `games`
+- `loans`
+- `profiles`
 
-## Nombre
+y las reglas de Row Level Security.
 
-He mantenido **Saturn Loan** porque encaja bien con el concepto: Saturn + préstamos.
+Las reglas hacen que el catálogo pueda ser leído por visitantes, pero que insertar, editar o eliminar juegos requiera una cuenta autenticada cuyo perfil tenga `role = 'admin'`. Supabase recomienda usar RLS para controlar estos permisos en las tablas expuestas por su Data API. citeturn348234search1turn348234search4
+
+### 3. Crear tu cuenta de administrador
+
+En Supabase entra en:
+
+`Authentication → Users`
+
+Crea el usuario que utilizarás para administrar Saturn Loan, con correo y contraseña.
+
+Copia el UUID de ese usuario.
+
+Después, en el SQL Editor ejecuta:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = 'EL-UUID-DE-TU-USUARIO';
+```
+
+El usuario tendrá entonces permisos de administrador.
+
+### 4. Conectar la web
+
+Abre `config.js`.
+
+Cambia:
+
+```js
+window.saturnLoanConfig = {
+  supabaseUrl: "https://TU-PROYECTO.supabase.co",
+  supabasePublishableKey: "TU-PUBLISHABLE-KEY"
+};
+```
+
+por los datos reales de tu proyecto.
+
+No pongas aquí la `service_role` key.
+
+### 5. Publicar
+
+Puedes subir la carpeta a un hosting estático (por ejemplo GitHub Pages, Cloudflare Pages o Netlify).
+
+No necesitas instalar Node para esta versión: la web usa la librería oficial de Supabase desde CDN. citeturn348234search4
+
+## Resultado
+
+Con esto:
+- añades `Mario Kart` desde tu ordenador;
+- otro ordenador abre Saturn Loan;
+- consulta la misma base de datos;
+- `Mario Kart` aparece también allí.
+
+Además, los cambios de catálogo y préstamos pueden actualizarse entre navegadores mediante Realtime. El SQL ya añade las tablas a `supabase_realtime`.
+
+## Seguridad
+
+La contraseña ya no está escrita dentro de `app.js`.
+
+La autorización real se hace en Supabase mediante:
+- Supabase Auth.
+- perfil de usuario.
+- rol `admin`.
+- Row Level Security.
+
+Esto evita que simplemente modificando el JavaScript del navegador alguien pueda saltarse las reglas de la base de datos.
+
+## Nota sobre el funcionamiento sin internet
+
+La web necesita conexión a internet para consultar la base de datos. Eso es necesario si quieres que varios ordenadores compartan exactamente el mismo catálogo.

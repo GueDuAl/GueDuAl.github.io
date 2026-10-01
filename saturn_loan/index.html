@@ -227,12 +227,16 @@
     <div class="modal-backdrop"></div>
     <div class="modal-window">
       <button class="modal-close" data-close-modal="adminModal" aria-label="Cerrar">×</button>
-      <p class="eyebrow">ACCESO</p>
+      <p class="eyebrow">ACCESO SEGURO</p>
       <h3 id="adminModalTitle">Modo administrador</h3>
-      <p class="modal-help">En esta versión local, la clave de demostración es <strong>SATURNO2000</strong>.</p>
+      <p class="modal-help">Inicia sesión con la cuenta de administrador de Saturn Loan.</p>
       <form id="adminLoginForm">
         <label class="field">
-          <span>Clave</span>
+          <span>Correo electrónico</span>
+          <input id="adminEmail" type="email" required autocomplete="email" placeholder="tu-correo@ejemplo.com">
+        </label>
+        <label class="field">
+          <span>Contraseña</span>
           <input id="adminPassword" type="password" required autocomplete="current-password">
         </label>
         <button class="btn btn-primary full" type="submit">Entrar como administrador</button>
@@ -323,6 +327,8 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
